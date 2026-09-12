@@ -28,14 +28,19 @@ The LiDAR is configured in `carla/lidar.py` with:
 Each LiDAR frame is written by `sensors/lidar_recorder.py` to:
 
 ```text
-data/raw/<carla_frame>.bin
+data/lidar_export/frame_<carla_frame>.npy
+data/lidar_export/frame_<carla_frame>.json
 ```
 
-Each file contains a sequence of 32-bit floating-point values grouped as:
+The `.npy` file contains a `(N, 4)` NumPy `float32` array grouped as:
 
 ```text
 x, y, z, intensity
 ```
+
+Coordinates remain in raw CARLA coordinates. The matching JSON sidecar contains
+the frame ID, simulation timestamp, sensor-to-world transform, and active LiDAR
+and vehicle metadata.
 
 ## Ground Truth
 

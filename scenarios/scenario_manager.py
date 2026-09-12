@@ -6,7 +6,7 @@ sys.path.append(".")
 
 from carla.connection import CarlaConnection
 from carla.vehicle import VehicleManager
-from carla.lidar import LidarManager
+from carla.lidar import LidarManager, LIDAR_CONFIG
 
 from sensors.lidar_recorder import LidarRecorder
 from ground_truth.ground_truth_logger import GroundTruthLogger
@@ -68,7 +68,15 @@ def main():
         print("\n[3] Starting LiDAR recorder...")
 
         lidar_recorder = LidarRecorder(
-            output_dir="data/raw"
+            output_dir="data/lidar_export",
+            metadata={
+                "channels": LIDAR_CONFIG["channels"],
+                "range_m": LIDAR_CONFIG["range_m"],
+                "points_per_second": LIDAR_CONFIG["points_per_second"],
+                "rotation_frequency_hz": LIDAR_CONFIG["rotation_frequency_hz"],
+                "carla_map": world.get_map().name,
+                "ego_vehicle": vehicle.type_id,
+            },
         )
 
         # --------------------------------

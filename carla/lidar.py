@@ -1,6 +1,14 @@
 import carla
 
 
+LIDAR_CONFIG = {
+    "channels": 32,
+    "points_per_second": 56000,
+    "rotation_frequency_hz": 10.0,
+    "range_m": 50.0,
+}
+
+
 class LidarManager:
 
     def __init__(self, world, vehicle):
@@ -17,18 +25,18 @@ class LidarManager:
         )
 
         # LiDAR configuration
-        lidar_bp.set_attribute("channels", "32")
+        lidar_bp.set_attribute("channels", str(LIDAR_CONFIG["channels"]))
         lidar_bp.set_attribute(
             "points_per_second",
-            "56000"
+            str(LIDAR_CONFIG["points_per_second"])
         )
         lidar_bp.set_attribute(
             "rotation_frequency",
-            "10"
+            str(LIDAR_CONFIG["rotation_frequency_hz"])
         )
         lidar_bp.set_attribute(
             "range",
-            "50"
+            str(LIDAR_CONFIG["range_m"])
         )
         lidar_bp.set_attribute(
             "upper_fov",
