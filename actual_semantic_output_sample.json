@@ -1,0 +1,1017 @@
+{
+  "total_points": 50000,
+  "sample_points": [
+    {
+      "x": -12.54598617553711,
+      "y": 45.07142639160156,
+      "z": 2.319939136505127,
+      "intensity": 0.5986585021018982,
+      "semantic_class": "uncertain",
+      "semantic_label": 27,
+      "confidence": 0.4955841600894928,
+      "semantic_importance": 0.08486752510070801
+    },
+    {
+      "x": -34.398136138916016,
+      "y": -34.40054702758789,
+      "z": -4.419163703918457,
+      "intensity": 0.8661761283874512,
+      "semantic_class": "rider",
+      "semantic_label": 12,
+      "confidence": 0.5295986533164978,
+      "semantic_importance": 0.858879566192627
+    },
+    {
+      "x": 10.111499786376953,
+      "y": 20.80725860595703,
+      "z": -4.794155120849609,
+      "intensity": 0.9699098467826843,
+      "semantic_class": "rider",
+      "semantic_label": 12,
+      "confidence": 0.9992833733558655,
+      "semantic_importance": 0.9997850060462952
+    },
+    {
+      "x": 33.2442626953125,
+      "y": -28.766088485717773,
+      "z": -3.1817502975463867,
+      "intensity": 0.18340450525283813,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.9005497694015503,
+      "semantic_importance": 0.3880659580230713
+    },
+    {
+      "x": -19.575775146484375,
+      "y": 2.4756431579589844,
+      "z": -0.6805496215820312,
+      "intensity": 0.29122912883758545,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.5652598142623901,
+      "semantic_importance": 0.34783117771148686
+    },
+    {
+      "x": 11.185287475585938,
+      "y": -36.05061340332031,
+      "z": -2.0785534381866455,
+      "intensity": 0.3663618564605713,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.8093584179878235,
+      "semantic_importance": 0.3771230220794678
+    },
+    {
+      "x": -4.393001556396484,
+      "y": 28.517601013183594,
+      "z": -3.0032620429992676,
+      "intensity": 0.5142344236373901,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.7415688633918762,
+      "semantic_importance": 0.3689882755279541
+    },
+    {
+      "x": 9.241455078125,
+      "y": -45.354957580566406,
+      "z": 1.0754485130310059,
+      "intensity": 0.17052412033081055,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.541733980178833,
+      "semantic_importance": 0.2587560653686523
+    },
+    {
+      "x": -43.494842529296875,
+      "y": 44.88855743408203,
+      "z": 4.656320571899414,
+      "intensity": 0.8083973526954651,
+      "semantic_class": "unknown",
+      "semantic_label": 20,
+      "confidence": 0.8238527774810791,
+      "semantic_importance": 0.09471558332443238
+    },
+    {
+      "x": -19.538623809814453,
+      "y": -40.2327880859375,
+      "z": 1.842329978942871,
+      "intensity": 0.44015249609947205,
+      "semantic_class": "uncertain",
+      "semantic_label": 0,
+      "confidence": 0.49702250957489014,
+      "semantic_importance": 0.08491067290306092
+    },
+    {
+      "x": -37.79617691040039,
+      "y": -0.48230743408203125,
+      "z": -4.65611457824707,
+      "intensity": 0.9093204140663147,
+      "semantic_class": "rider",
+      "semantic_label": 12,
+      "confidence": 0.9892396330833435,
+      "semantic_importance": 0.9967719316482544
+    },
+    {
+      "x": -24.12200355529785,
+      "y": 16.252227783203125,
+      "z": -1.8828892707824707,
+      "intensity": 0.5200680494308472,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.6667004823684692,
+      "semantic_importance": 0.3600040435791016
+    },
+    {
+      "x": 4.671024322509766,
+      "y": -31.51455307006836,
+      "z": 4.6958465576171875,
+      "intensity": 0.7751328349113464,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7913830280303955,
+      "semantic_importance": 0.2812244653701782
+    },
+    {
+      "x": 43.94989776611328,
+      "y": 39.48273468017578,
+      "z": 0.9789996147155762,
+      "intensity": 0.9218742251396179,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7275449633598328,
+      "semantic_importance": 0.2754790484905243
+    },
+    {
+      "x": -41.15074920654297,
+      "y": -30.401714324951172,
+      "z": -4.547727108001709,
+      "intensity": 0.32533031702041626,
+      "semantic_class": "rider",
+      "semantic_label": 12,
+      "confidence": 0.9375393390655518,
+      "semantic_importance": 0.9812617897987366
+    },
+    {
+      "x": -11.132270812988281,
+      "y": -22.865095138549805,
+      "z": 3.287374496459961,
+      "intensity": 0.35675331950187683,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7677586078643799,
+      "semantic_importance": 0.27909827828407285
+    },
+    {
+      "x": -21.90654945373535,
+      "y": 4.2696075439453125,
+      "z": -3.5907578468322754,
+      "intensity": 0.8021969795227051,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.9432396292686462,
+      "semantic_importance": 0.39318876266479497
+    },
+    {
+      "x": -42.54493713378906,
+      "y": 48.688690185546875,
+      "z": 2.722447395324707,
+      "intensity": 0.1987156867980957,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6214632391929626,
+      "semantic_importance": 0.26593168973922726
+    },
+    {
+      "x": -49.44778823852539,
+      "y": 31.546142578125,
+      "z": 2.068572998046875,
+      "intensity": 0.7290071845054626,
+      "semantic_class": "uncertain",
+      "semantic_label": 27,
+      "confidence": 0.4777939021587372,
+      "semantic_importance": 0.08433381319046021
+    },
+    {
+      "x": 27.127037048339844,
+      "y": -42.59553527832031,
+      "z": -1.4153428077697754,
+      "intensity": 0.11586906015872955,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.5466651320457458,
+      "semantic_importance": 0.34559981822967534
+    },
+    {
+      "x": 36.31034851074219,
+      "y": 12.329811096191406,
+      "z": -1.6910197734832764,
+      "intensity": 0.06355834752321243,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.7241292595863342,
+      "semantic_importance": 0.3668955087661743
+    },
+    {
+      "x": -18.90176773071289,
+      "y": -17.481666564941406,
+      "z": 2.2960615158081055,
+      "intensity": 0.6375574469566345,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6775025725364685,
+      "semantic_importance": 0.2709752261638641
+    },
+    {
+      "x": 38.721275329589844,
+      "y": -2.7785072326660156,
+      "z": -3.8040575981140137,
+      "intensity": 0.7132447957992554,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.9888039231300354,
+      "semantic_importance": 0.3986564636230469
+    },
+    {
+      "x": 26.078506469726562,
+      "y": 6.127719879150391,
+      "z": 2.709671974182129,
+      "intensity": 0.49379560351371765,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6687899827957153,
+      "semantic_importance": 0.270191091299057
+    },
+    {
+      "x": 2.273284912109375,
+      "y": -7.245899200439453,
+      "z": -4.7458086013793945,
+      "intensity": 0.10789142549037933,
+      "semantic_class": "rider",
+      "semantic_label": 12,
+      "confidence": 0.998654305934906,
+      "semantic_importance": 0.9995962977409363
+    },
+    {
+      "x": -46.85708236694336,
+      "y": 13.641040802001953,
+      "z": -1.8564403057098389,
+      "intensity": 0.508570671081543,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.5750885605812073,
+      "semantic_importance": 0.34901061058044436
+    },
+    {
+      "x": 40.75664520263672,
+      "y": -25.070777893066406,
+      "z": -0.8961706161499023,
+      "intensity": 0.7555511593818665,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.6157853007316589,
+      "semantic_importance": 0.3538942337036133
+    },
+    {
+      "x": -27.12018394470215,
+      "y": -42.30200958251953,
+      "z": -2.1024856567382812,
+      "intensity": 0.16122128069400787,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.6756899952888489,
+      "semantic_importance": 0.3610827922821045
+    },
+    {
+      "x": 42.969764709472656,
+      "y": 30.812034606933594,
+      "z": 1.3340377807617188,
+      "intensity": 0.8714606165885925,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.770024299621582,
+      "semantic_importance": 0.279302179813385
+    },
+    {
+      "x": 30.367210388183594,
+      "y": -31.342992782592773,
+      "z": 3.9255895614624023,
+      "intensity": 0.5393422245979309,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7908343076705933,
+      "semantic_importance": 0.28117507696151733
+    },
+    {
+      "x": 30.7440185546875,
+      "y": 39.609130859375,
+      "z": -1.8199653625488281,
+      "intensity": 0.11005192250013351,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.5192528367042542,
+      "semantic_importance": 0.34231033325195315
+    },
+    {
+      "x": -27.206483840942383,
+      "y": -7.289222717285156,
+      "z": 3.180147171020508,
+      "intensity": 0.8607305884361267,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7455397844314575,
+      "semantic_importance": 0.27709858417510985
+    },
+    {
+      "x": -49.304786682128906,
+      "y": 1.0747299194335938,
+      "z": -0.825890064239502,
+      "intensity": 0.22210781276226044,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5133746266365051,
+      "semantic_importance": 0.25620371103286743
+    },
+    {
+      "x": -38.01346206665039,
+      "y": -16.238483428955078,
+      "z": 4.4290971755981445,
+      "intensity": 0.3232029378414154,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7235861420631409,
+      "semantic_importance": 0.2751227617263794
+    },
+    {
+      "x": 1.879058837890625,
+      "y": 20.301895141601562,
+      "z": -1.363703966140747,
+      "intensity": 0.9717820882797241,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.5569842457771301,
+      "semantic_importance": 0.3468380928039551
+    },
+    {
+      "x": 46.244728088378906,
+      "y": -24.82176971435547,
+      "z": -0.027514934539794922,
+      "intensity": 0.3008783161640167,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5516666173934937,
+      "semantic_importance": 0.25964999198913574
+    },
+    {
+      "x": -21.51595115661621,
+      "y": -46.31130599975586,
+      "z": 1.0956430435180664,
+      "intensity": 0.5026790499687195,
+      "semantic_class": "uncertain",
+      "semantic_label": 0,
+      "confidence": 0.46667516231536865,
+      "semantic_importance": 0.08400025367736817
+    },
+    {
+      "x": -44.85212326049805,
+      "y": -22.135353088378906,
+      "z": 4.082658767700195,
+      "intensity": 0.23956188559532166,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.749875009059906,
+      "semantic_importance": 0.27748875617980956
+    },
+    {
+      "x": -35.51051330566406,
+      "y": -1.0547256469726562,
+      "z": 4.856504440307617,
+      "intensity": 0.2420552670955658,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7135863900184631,
+      "semantic_importance": 0.27422277331352235
+    },
+    {
+      "x": 17.21355438232422,
+      "y": 26.161964416503906,
+      "z": -2.623624563217163,
+      "intensity": 0.7282163500785828,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.8016259074211121,
+      "semantic_importance": 0.3761950969696045
+    },
+    {
+      "x": -13.221687316894531,
+      "y": 13.230579376220703,
+      "z": 1.3352971076965332,
+      "intensity": 0.5357747077941895,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7149567008018494,
+      "semantic_importance": 0.2743461012840271
+    },
+    {
+      "x": -40.97102355957031,
+      "y": 33.530250549316406,
+      "z": -1.7921993732452393,
+      "intensity": 0.18651850521564484,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5742809772491455,
+      "semantic_importance": 0.2616852879524231
+    },
+    {
+      "x": -45.9224853515625,
+      "y": 9.089298248291016,
+      "z": 1.7756438255310059,
+      "intensity": 0.01658782921731472,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7492591142654419,
+      "semantic_importance": 0.27743332386016845
+    },
+    {
+      "x": 1.2093048095703125,
+      "y": -27.350421905517578,
+      "z": 1.4517278671264648,
+      "intensity": 0.17436642944812775,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5475524067878723,
+      "semantic_importance": 0.2592797040939331
+    },
+    {
+      "x": 19.093772888183594,
+      "y": -11.326465606689453,
+      "z": 4.367300033569336,
+      "intensity": 0.1375209391117096,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.811715304851532,
+      "semantic_importance": 0.2830543756484985
+    },
+    {
+      "x": -15.893363952636719,
+      "y": -38.65264892578125,
+      "z": 4.246936798095703,
+      "intensity": 0.8773393630981445,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7501710057258606,
+      "semantic_importance": 0.27751539945602416
+    },
+    {
+      "x": -24.20583724975586,
+      "y": 15.998405456542969,
+      "z": 3.172222137451172,
+      "intensity": 0.5552008152008057,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.70975661277771,
+      "semantic_importance": 0.2738780915737152
+    },
+    {
+      "x": 2.965057373046875,
+      "y": -25.81477165222168,
+      "z": -4.068972587585449,
+      "intensity": 0.8972157835960388,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.9516329765319824,
+      "semantic_importance": 0.3941959619522095
+    },
+    {
+      "x": 40.04180145263672,
+      "y": 13.31014633178711,
+      "z": -1.6097021102905273,
+      "intensity": 0.34920957684516907,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.6983808875083923,
+      "semantic_importance": 0.36380569934844975
+    },
+    {
+      "x": 22.595565795898438,
+      "y": 39.711029052734375,
+      "z": 3.8708648681640625,
+      "intensity": 0.7798755168914795,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5643361806869507,
+      "semantic_importance": 0.26079025268554684
+    },
+    {
+      "x": 14.203170776367188,
+      "y": -41.586002349853516,
+      "z": -3.3837127685546875,
+      "intensity": 0.8985542058944702,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.8445863723754883,
+      "semantic_importance": 0.3813503742218018
+    },
+    {
+      "x": 10.642902374267578,
+      "y": -49.08029556274414,
+      "z": -3.9852845668792725,
+      "intensity": 0.6635017395019531,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5089105367660522,
+      "semantic_importance": 0.25580195188522337
+    },
+    {
+      "x": -49.49384307861328,
+      "y": -33.91919708251953,
+      "z": 0.487337589263916,
+      "intensity": 0.6918951869010925,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5173739790916443,
+      "semantic_importance": 0.256563663482666
+    },
+    {
+      "x": 15.196128845214844,
+      "y": -27.573068618774414,
+      "z": 2.1217923164367676,
+      "intensity": 0.23724909126758575,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5382762551307678,
+      "semantic_importance": 0.2584448575973511
+    },
+    {
+      "x": -17.46002960205078,
+      "y": 24.649139404296875,
+      "z": 1.4963288307189941,
+      "intensity": 0.8492234349250793,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.767250120639801,
+      "semantic_importance": 0.2790525197982788
+    },
+    {
+      "x": 15.76129150390625,
+      "y": 6.830860137939453,
+      "z": -4.0632524490356445,
+      "intensity": 0.3677158057689667,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.9232442378997803,
+      "semantic_importance": 0.39078931808471684
+    },
+    {
+      "x": -23.47976303100586,
+      "y": -25.601036071777344,
+      "z": 4.730105400085449,
+      "intensity": 0.39309772849082947,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7536473870277405,
+      "semantic_importance": 0.27782827019691464
+    },
+    {
+      "x": 39.20465850830078,
+      "y": 13.113861083984375,
+      "z": 2.948112964630127,
+      "intensity": 0.5026370882987976,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6544194221496582,
+      "semantic_importance": 0.2688977479934692
+    },
+    {
+      "x": 7.690387725830078,
+      "y": -0.7482337951660156,
+      "z": -3.04757022857666,
+      "intensity": 0.7224521040916443,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.9372943043708801,
+      "semantic_importance": 0.3924753189086914
+    },
+    {
+      "x": -21.92276382446289,
+      "y": -47.56840515136719,
+      "z": 1.4547228813171387,
+      "intensity": 0.1771106719970703,
+      "semantic_class": "uncertain",
+      "semantic_label": 0,
+      "confidence": 0.47230231761932373,
+      "semantic_importance": 0.08416906595230103
+    },
+    {
+      "x": 44.045860290527344,
+      "y": 45.392860412597656,
+      "z": 4.148643493652344,
+      "intensity": 0.37015870213508606,
+      "semantic_class": "unknown",
+      "semantic_label": 27,
+      "confidence": 0.5288351774215698,
+      "semantic_importance": 0.08586505651474
+    },
+    {
+      "x": -48.45433807373047,
+      "y": 42.83185577392578,
+      "z": -0.7181587219238281,
+      "intensity": 0.9666548371315002,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7552662491798401,
+      "semantic_importance": 0.2779739677906036
+    },
+    {
+      "x": 46.36199188232422,
+      "y": 35.30094909667969,
+      "z": -2.055511236190796,
+      "intensity": 0.3850977420806885,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.627898097038269,
+      "semantic_importance": 0.3553477764129639
+    },
+    {
+      "x": 35.113670349121094,
+      "y": -18.307798385620117,
+      "z": -3.305072546005249,
+      "intensity": 0.5568012595176697,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.9525158405303955,
+      "semantic_importance": 0.3943018913269043
+    },
+    {
+      "x": 43.615478515625,
+      "y": 19.602981567382812,
+      "z": 0.7006115913391113,
+      "intensity": 0.09717649221420288,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7380564212799072,
+      "semantic_importance": 0.2764250814914703
+    },
+    {
+      "x": 11.500720977783203,
+      "y": 49.00538635253906,
+      "z": -3.5991597175598145,
+      "intensity": 0.5183296799659729,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.9461105465888977,
+      "semantic_importance": 0.2951499581336975
+    },
+    {
+      "x": 37.73731231689453,
+      "y": 24.076858520507812,
+      "z": 1.9701576232910156,
+      "intensity": 0.7024840712547302,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7368294596672058,
+      "semantic_importance": 0.2763146460056305
+    },
+    {
+      "x": -14.050884246826172,
+      "y": -20.64081382751465,
+      "z": 3.093611717224121,
+      "intensity": 0.8101133704185486,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7469714283943176,
+      "semantic_importance": 0.2772274374961853
+    },
+    {
+      "x": 36.707237243652344,
+      "y": 41.324058532714844,
+      "z": 0.11342430114746094,
+      "intensity": 0.5015162825584412,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7643445134162903,
+      "semantic_importance": 0.27879100441932675
+    },
+    {
+      "x": 29.82952117919922,
+      "y": 14.996391296386719,
+      "z": 2.0196685791015625,
+      "intensity": 0.7957926988601685,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6861571073532104,
+      "semantic_importance": 0.2717541396617889
+    },
+    {
+      "x": 39.00053405761719,
+      "y": -16.200481414794922,
+      "z": -1.2441704273223877,
+      "intensity": 0.09398193657398224,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.7079353928565979,
+      "semantic_importance": 0.36495225429534917
+    },
+    {
+      "x": 7.828014373779297,
+      "y": -46.4057731628418,
+      "z": -0.34401988983154297,
+      "intensity": 0.5426446199417114,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5819056630134583,
+      "semantic_importance": 0.2623715043067932
+    },
+    {
+      "x": -21.345874786376953,
+      "y": 9.083324432373047,
+      "z": -4.694997310638428,
+      "intensity": 0.0373481884598732,
+      "semantic_class": "rider",
+      "semantic_label": 12,
+      "confidence": 0.9903401732444763,
+      "semantic_importance": 0.9971020221710205
+    },
+    {
+      "x": 32.26005554199219,
+      "y": -13.980937957763672,
+      "z": -3.7293949127197266,
+      "intensity": 0.5222432613372803,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.98337721824646,
+      "semantic_importance": 0.3980052709579468
+    },
+    {
+      "x": 26.999351501464844,
+      "y": -28.417896270751953,
+      "z": 1.2289047241210938,
+      "intensity": 0.08534746617078781,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6623013019561768,
+      "semantic_importance": 0.26960712075233456
+    },
+    {
+      "x": -44.83182907104492,
+      "y": 3.1354598999023438,
+      "z": 0.40635108947753906,
+      "intensity": 0.6374298930168152,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7636094689369202,
+      "semantic_importance": 0.27872486114501954
+    },
+    {
+      "x": 22.609130859375,
+      "y": 47.585205078125,
+      "z": 0.16300296783447266,
+      "intensity": 0.32295647263526917,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7923582196235657,
+      "semantic_importance": 0.28131224513053893
+    },
+    {
+      "x": 29.51862335205078,
+      "y": -22.916776657104492,
+      "z": -0.610285758972168,
+      "intensity": 0.07845637947320938,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.6223998665809631,
+      "semantic_importance": 0.35468797683715825
+    },
+    {
+      "x": -47.46492385864258,
+      "y": 46.26483917236328,
+      "z": 3.3598012924194336,
+      "intensity": 0.6959742307662964,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5967186689376831,
+      "semantic_importance": 0.26370466947555543
+    },
+    {
+      "x": -9.104705810546875,
+      "y": -32.670570373535156,
+      "z": -3.4356296062469482,
+      "intensity": 0.2502428889274597,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.9218168258666992,
+      "semantic_importance": 0.39061801433563237
+    },
+    {
+      "x": 4.922664642333984,
+      "y": 21.4595947265625,
+      "z": 1.601973533630371,
+      "intensity": 0.279933899641037,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7192190289497375,
+      "semantic_importance": 0.27472971081733705
+    },
+    {
+      "x": 45.48652648925781,
+      "y": 23.789688110351562,
+      "z": 0.5435409545898438,
+      "intensity": 0.6117207407951355,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7296011447906494,
+      "semantic_importance": 0.27566410303115846
+    },
+    {
+      "x": -8.039993286132812,
+      "y": -25.22690200805664,
+      "z": -1.4402732849121094,
+      "intensity": 0.7578461170196533,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.7798770666122437,
+      "semantic_importance": 0.37358524799346926
+    },
+    {
+      "x": -48.56064987182617,
+      "y": -38.392738342285156,
+      "z": -4.539973735809326,
+      "intensity": 0.04072880372405052,
+      "semantic_class": "rider",
+      "semantic_label": 12,
+      "confidence": 0.9607436060905457,
+      "semantic_importance": 0.9882230758666992
+    },
+    {
+      "x": 35.546058654785156,
+      "y": 20.36578369140625,
+      "z": -0.25826168060302734,
+      "intensity": 0.09783416241407394,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.590886116027832,
+      "semantic_importance": 0.2631797432899475
+    },
+    {
+      "x": -0.8384132385253906,
+      "y": -2.6528244018554688,
+      "z": -3.2679812908172607,
+      "intensity": 0.4338516592979431,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.960136353969574,
+      "semantic_importance": 0.39521636962890627
+    },
+    {
+      "x": -10.149528503417969,
+      "y": 11.585010528564453,
+      "z": 1.3509364128112793,
+      "intensity": 0.045304011553525925,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6996626853942871,
+      "semantic_importance": 0.27296964526176454
+    },
+    {
+      "x": -12.538738250732422,
+      "y": 12.585990905761719,
+      "z": 0.03136253356933594,
+      "intensity": 0.8564898371696472,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6526408195495605,
+      "semantic_importance": 0.26873767375946045
+    },
+    {
+      "x": 15.869361877441406,
+      "y": -33.70655822753906,
+      "z": -4.294312477111816,
+      "intensity": 0.6424192786216736,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6954221129417419,
+      "semantic_importance": 0.27258798480033875
+    },
+    {
+      "x": -47.34886932373047,
+      "y": 8.577556610107422,
+      "z": 4.4023027420043945,
+      "intensity": 0.575474202632904,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6323227286338806,
+      "semantic_importance": 0.2669090509414673
+    },
+    {
+      "x": -11.18301010131836,
+      "y": 14.328819274902344,
+      "z": -0.41747140884399414,
+      "intensity": 0.5456168055534363,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.5376224517822266,
+      "semantic_importance": 0.2583860278129578
+    },
+    {
+      "x": 44.14647674560547,
+      "y": -11.38973617553711,
+      "z": 4.611906051635742,
+      "intensity": 0.9053506255149841,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.83476322889328,
+      "semantic_importance": 0.28512868881225584
+    },
+    {
+      "x": -30.42088508605957,
+      "y": -43.06386947631836,
+      "z": -3.992219924926758,
+      "intensity": 0.01822182536125183,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.6089303493499756,
+      "semantic_importance": 0.3530716419219971
+    },
+    {
+      "x": -40.555702209472656,
+      "y": 18.300674438476562,
+      "z": -4.288113594055176,
+      "intensity": 0.31897562742233276,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.9838294386863708,
+      "semantic_importance": 0.2985446512699127
+    },
+    {
+      "x": 34.48753356933594,
+      "y": -47.67280578613281,
+      "z": 3.1446847915649414,
+      "intensity": 0.2818547785282135,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6753992438316345,
+      "semantic_importance": 0.27078593373298643
+    },
+    {
+      "x": -38.18351745605469,
+      "y": 19.67371368408203,
+      "z": 1.2894287109375,
+      "intensity": 0.8774720430374146,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.7569975852966309,
+      "semantic_importance": 0.27812978625297546
+    },
+    {
+      "x": 23.507102966308594,
+      "y": 30.34809112548828,
+      "z": -2.179654121398926,
+      "intensity": 0.17743954062461853,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.7252511978149414,
+      "semantic_importance": 0.36703014373779297
+    },
+    {
+      "x": 25.061477661132812,
+      "y": 30.68347930908203,
+      "z": 4.905051231384277,
+      "intensity": 0.41261768341064453,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.6391885280609131,
+      "semantic_importance": 0.2675269603729248
+    },
+    {
+      "x": -12.79819107055664,
+      "y": 27.64129638671875,
+      "z": -1.5919647216796875,
+      "intensity": 0.9307573437690735,
+      "semantic_class": "sidewalk",
+      "semantic_label": 1,
+      "confidence": 0.5148887038230896,
+      "semantic_importance": 0.34178664684295657
+    },
+    {
+      "x": 35.841278076171875,
+      "y": -7.100597381591797,
+      "z": 2.5087108612060547,
+      "intensity": 0.754542887210846,
+      "semantic_class": "road",
+      "semantic_label": 0,
+      "confidence": 0.692993700504303,
+      "semantic_importance": 0.27236943840980526
+    }
+  ],
+  "model_info": {
+    "model_name": "pointnet_kasc",
+    "device": "cuda",
+    "label_set": "semantickitti",
+    "num_classes": 19
+  },
+  "timing": {
+    "preprocessing_time": 0.004008769989013672,
+    "inference_time": 0.38860154151916504,
+    "total_time": 0.3926103115081787,
+    "points_per_second": 128666.16827706493
+  }
+}

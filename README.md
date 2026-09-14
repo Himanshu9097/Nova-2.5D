@@ -13,8 +13,8 @@ The system is built as a highly optimized C++ core, with Python bridges for Deep
 
 *   **`mapping/` (C++ Core):** Uses sparse `std::unordered_map` with Welford's algorithm to compute incremental statistics (elevation, occupancy, semantics) with minimal memory footprint.
 *   **`perception/` (Python AI Bridge):** Outlines the data ingestion for external AI models.
-    *   `semantic/`: Built to ingest data from sparse convolution networks like **SPVNAS** or **Cylinder3D** (Owned by Vivek).
-    *   `tracking/`: Multi-Object Kalman Tracking architecture (Owned by Kashika).
+    *   `semantic/`: Built to ingest data from sparse convolution networks like **PointNet**, **SPVNAS** or **Cylinder3D**. (Integrated Real GPU Inference using PointNet).
+    *   `tracking/`: Multi-Object Kalman Tracking architecture.
 *   **`simulation/` (CARLA Bridge):** Contains tools to parse Semantic LiDAR arrays from the CARLA Simulator and generate ground-truth JSON files for engine validation.
 
 ## Building the C++ Engine
