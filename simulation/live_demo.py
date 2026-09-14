@@ -9,10 +9,12 @@ import json
 import traceback
 import argparse
 import threading
+from sklearn.cluster import DBSCAN
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--carla-host', default='127.0.0.1', help='IP Address of the Main Laptop running CARLA')
 parser.add_argument('--dashboard-host', default='127.0.0.1', help='IP Address of the laptop running the Dashboard')
+parser.add_argument('--use-ai', action='store_true', help='Use Real PyTorch GPU Inference instead of CARLA Ground Truth')
 args = parser.parse_args()
 HOST = args.carla_host
 PORT = 2000
@@ -41,9 +43,21 @@ latest_lidar_tags = None
 latest_lidar_frame = None
 latest_lidar_raw_data = None
 
+if args.use_ai:
+    print("Loading Real PointNet AI Model (GPU)...")
+    try:
+        from src import semantic_inference
+        # Ensure the model exists or tell user to download it
+        if not os.path.exists("models/sample-model.pth"):
+            print("WARNING: models/sample-model.pth not found! AI mode might fail.")
+    except ImportError:
+        print("Error: Could not import src.semantic_inference. Make sure you have the semantic-ai branch set up correctly!")
+        args.use_ai = False
+
 def main():
     actor_list = []
     client = None
+    tm = None
     
     try:
         # Tell dashboard we are connecting
@@ -55,6 +69,10 @@ def main():
         print(f"Connecting to CARLA on {HOST}:{PORT}...")
         client = carla.Client(HOST, PORT)
         client.set_timeout(60.0) # INCREASED TIMEOUT: Town03 takes a while to load on some PCs
+        
+        # Connect to remote Traffic Manager to fix autopilot
+        tm = client.get_trafficmanager(8000)
+        tm.set_global_distance_to_leading_vehicle(2.0)
         
         world = client.get_world()
         
@@ -153,9 +171,25 @@ def main():
         last_time = time.time()
         is_processing = False
         
-        def process_lidar_async(frame, num_pts, pts_4d, raw_mem, speed):
+        def process_lidar_async(frame, num_pts, pts_4d, tags, raw_mem, speed):
             nonlocal is_processing, last_time
             try:
+                # Dynamically Count Objects using DBScan Clustering
+                pedestrians_tracked = 0
+                vehicles_tracked = 0
+                
+                # Filter dynamic points (4=Pedestrian, 10=Vehicle)
+                ped_points = pts_4d[tags == 4][:, :3]
+                veh_points = pts_4d[tags == 10][:, :3]
+                
+                if len(ped_points) > 5:
+                    clustering = DBSCAN(eps=1.0, min_samples=5).fit(ped_points)
+                    pedestrians_tracked = len(set(clustering.labels_)) - (1 if -1 in clustering.labels_ else 0)
+                    
+                if len(veh_points) > 10:
+                    clustering = DBSCAN(eps=2.5, min_samples=10).fit(veh_points)
+                    vehicles_tracked = len(set(clustering.labels_)) - (1 if -1 in clustering.labels_ else 0)
+
                 frame_data = {
                     "frame_id": frame,
                     "timestamp_ns": int(time.time() * 1e9),
@@ -202,7 +236,7 @@ def main():
                 payload = {
                     "frame": frame, "raw_points": num_pts, "raw_memory_kb": round(raw_mem, 2),
                     "nova_cells": nova_cells, "nova_memory_kb": round(nova_mem, 2), "speed_kmh": round(speed, 1),
-                    "pedestrians_tracked": 0, "vehicles_tracked": 3, "status": "Active Mapping",
+                    "pedestrians_tracked": pedestrians_tracked, "vehicles_tracked": vehicles_tracked, "status": "Active Mapping",
                     "fps": round(fps, 1), "latency_ms": round(latency, 1), "accuracy": round(acc, 1)
                 }
                 try: requests.post(DASHBOARD_URL, json=payload, timeout=0.1)
@@ -239,6 +273,28 @@ def main():
                 # Subsample to keep Python fast
                 downsampled_points = points[::8]
                 downsampled_tags = tags[::8]
+                
+                if args.use_ai:
+                    # Overwrite tags with real AI predictions!
+                    try:
+                        # Extract intensities (cos_inc) as the 4th channel
+                        intensities = data['cos_inc'][::8]
+                        # Prepare Nx4 array for the model
+                        pts_4d_for_ai = np.column_stack((downsampled_points, intensities))
+                        # Run inference
+                        ai_results = semantic_inference(
+                            pts_4d_for_ai,
+                            model_name="pointnet_kasc",
+                            model_path="models/sample-model.pth",
+                            device='cuda',
+                            label_set="semantickitti"
+                        )
+                        # Extract predicted labels
+                        ai_tags = np.array([p["semantic_label"] for p in ai_results["points"]], dtype=np.uint32)
+                        downsampled_tags = ai_tags
+                    except Exception as e:
+                        print(f"AI Inference Error: {e}")
+                
                 downsampled_points_4d = np.column_stack((downsampled_points, np.zeros(downsampled_points.shape[0], dtype=np.float32)))
                 
                 latest_lidar_points = downsampled_points
@@ -256,7 +312,7 @@ def main():
                 if not is_processing:
                     is_processing = True
                     threading.Thread(target=process_lidar_async, args=(
-                        latest_lidar_frame, num_points, downsampled_points_4d, raw_memory_kb, speed_kmh
+                        latest_lidar_frame, num_points, downsampled_points_4d, downsampled_tags, raw_memory_kb, speed_kmh
                     )).start()
             
             for event in pygame.event.get():
@@ -267,7 +323,10 @@ def main():
                         running = False
                     elif event.key == pygame.K_p:
                         autopilot_enabled = not autopilot_enabled
-                        vehicle.set_autopilot(autopilot_enabled)
+                        if tm:
+                            vehicle.set_autopilot(autopilot_enabled, tm.get_port())
+                        else:
+                            vehicle.set_autopilot(autopilot_enabled)
                         print(f"Autopilot toggled to: {autopilot_enabled}")
                     elif event.key == pygame.K_f:
                         auto_follow_camera = not auto_follow_camera
@@ -312,7 +371,10 @@ def main():
                         running = False
                     elif event.button == 2: # X -> Autopilot
                         autopilot_enabled = not autopilot_enabled
-                        vehicle.set_autopilot(autopilot_enabled)
+                        if tm:
+                            vehicle.set_autopilot(autopilot_enabled, tm.get_port())
+                        else:
+                            vehicle.set_autopilot(autopilot_enabled)
                         print(f"Autopilot toggled to: {autopilot_enabled}")
                     elif event.button == 3: # Y -> Auto Follow Cam
                         auto_follow_camera = not auto_follow_camera
@@ -412,34 +474,29 @@ def main():
                         is_road = (tgs_v == 7) | (tgs_v == 6) | (tgs_v == 8) # Roads & Sidewalks
                         is_static = ~(is_dyn | is_road)
                         
-                        # Culling: Nova-2.5D ignores distant static data to save memory
-                        keep = np.zeros(len(px), dtype=bool)
-                        keep[is_dyn] = True # High Priority (Always Render)
-                        keep[is_static & (dists < 30)] = True # Medium Priority
-                        keep[is_road & (dists < 15)] = True # Low Priority
+                        # Show FULL Map, but visually dim low-priority areas to show adaptive engine working
+                        colors = np.zeros((len(px), 3), dtype=np.uint8)
                         
-                        px, py = px[keep], py[keep]
-                        final_tags = tgs_v[keep]
+                        # 1. High Priority (Dynamic objects are bright)
+                        colors[is_dyn & (tgs_v == 4)] = [255, 50, 50]   # Pedestrian (Red)
+                        colors[is_dyn & (tgs_v == 10)] = [50, 150, 255] # Vehicle (Blue)
                         
-                        if len(px) > 0:
-                            # Colorize based on semantics
-                            colors = np.zeros((len(px), 3), dtype=np.uint8)
-                            
-                            f_dyn = (final_tags == 4) | (final_tags == 10)
-                            f_road = (final_tags == 7) | (final_tags == 6) | (final_tags == 8)
-                            f_static = ~(f_dyn | f_road)
-                            
-                            # Dynamic = Bright Red
-                            colors[f_dyn] = [255, 50, 50]
-                            # Static = Yellow
-                            colors[f_static] = [250, 204, 21]
-                            # Road = Faint Green
-                            colors[f_road] = [16, 80, 40]
-                            
-                            # Map array directly to surface pixels
-                            pixels = pygame.surfarray.pixels3d(radar_surf)
-                            pixels[px, py] = colors
-                            del pixels # Unlock surface
+                        # 2. Medium Priority (Close static objects are bright yellow, far are faded)
+                        close_static = is_static & (dists < 30)
+                        far_static = is_static & (dists >= 30)
+                        colors[close_static] = [250, 204, 21]  # Bright Yellow
+                        colors[far_static] = [80, 80, 20]      # Faded Dark Yellow (Low Priority)
+                        
+                        # 3. Low Priority (Close roads are bright green, far roads are faded)
+                        close_road = is_road & (dists < 15)
+                        far_road = is_road & (dists >= 15)
+                        colors[close_road] = [16, 120, 40]     # Bright Green
+                        colors[far_road] = [5, 40, 15]         # Faded Dark Green (Low Priority)
+                        
+                        # Map array directly to surface pixels (No hard culling, FULL MAP visible!)
+                        pixels = pygame.surfarray.pixels3d(radar_surf)
+                        pixels[px, py] = colors
+                        del pixels # Unlock surface
                 except Exception as e:
                     print(f"Radar Render Error: {e}")
                     traceback.print_exc()
