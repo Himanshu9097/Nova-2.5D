@@ -57,6 +57,11 @@ def main():
         
         world = client.get_world()
         
+        # [OPTIMIZATION] Disable 3D Rendering on the server to massively save GPU memory
+        settings = world.get_settings()
+        settings.no_rendering_mode = True
+        world.apply_settings(settings)
+        
         print(f"Using Default Map: {world.get_map().name} to prevent memory crashes.")
             
         blueprint_library = world.get_blueprint_library()
@@ -90,8 +95,9 @@ def main():
         
         # 2. Attach High-End Semantic LiDAR (Nova-2.5D Adaptive Sensor)
         lidar_bp = blueprint_library.find('sensor.lidar.ray_cast_semantic')
-        lidar_bp.set_attribute('channels', '64')
-        lidar_bp.set_attribute('points_per_second', '1300000')
+        # [OPTIMIZATION] Lowered channels and points to prevent Wi-Fi bandwidth lag
+        lidar_bp.set_attribute('channels', '32')
+        lidar_bp.set_attribute('points_per_second', '300000')
         lidar_bp.set_attribute('rotation_frequency', '10.0')
         lidar_bp.set_attribute('range', '50.0')
         
