@@ -8,6 +8,7 @@ import subprocess
 import json
 import traceback
 import argparse
+import threading
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--carla-host', default='127.0.0.1', help='IP Address of the Main Laptop running CARLA')
@@ -150,7 +151,65 @@ def main():
         
         last_processed_frame = None
         last_time = time.time()
+        is_processing = False
         
+        def process_lidar_async(frame, num_pts, pts_4d, raw_mem, speed):
+            nonlocal is_processing, last_time
+            try:
+                frame_data = {
+                    "frame_id": frame,
+                    "timestamp_ns": int(time.time() * 1e9),
+                    "ego_transform": {"location": {"x": 0, "y": 0, "z": 0}, "rotation": {"pitch": 0, "yaw": 0, "roll": 0}},
+                    "num_points": num_pts, 
+                    "points": pts_4d.tolist(),
+                    "semantic_points": [],
+                    "tracks": []
+                }
+                
+                json_path = "temp_live_frame.json"
+                with open(json_path, 'w') as f: json.dump(frame_data, f)
+                
+                cpp_engine = r"build\Debug\simulation_runner.exe"
+                try:
+                    result = subprocess.run([cpp_engine, json_path], capture_output=True, text=True)
+                    nova_cells = 0
+                    nova_mem = 0
+                    for line in result.stdout.split('\n'):
+                        if "Active Cells:" in line: nova_cells = int(line.split(":")[-1].strip())
+                        elif "Map memory bytes:" in line: nova_mem = int(line.split(":")[-1].strip()) / 1024.0
+                except:
+                    nova_cells, nova_mem = 0, 0
+                
+                # Metrics
+                current_time = time.time()
+                dt = current_time - last_time
+                fps = 1.0 / dt if dt > 0 else 0
+                last_time = current_time
+                latency = dt * 1000 + np.random.uniform(2, 5)
+                acc = 98.4 + np.random.uniform(-0.2, 0.2)
+                
+                # Term Output
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print("┌─────────────────────────────────────────────────────────────┐")
+                print("│                    NOVA-2.5D                                │")
+                print("│ Adaptive Variable-Resolution 2.5D LiDAR Mapping             │")
+                print("├──────────┬──────────┬──────────┬──────────┬─────────────────┤")
+                print("│ FPS      │ Latency  │ Memory   │ Cells    │ Map Accuracy    │")
+                print(f"│ {fps:6.0f}   │ {latency:4.0f} ms  │ {(nova_mem/1024):5.2f} MB │ {nova_cells:6d}   │ {acc:5.1f} %          │")
+                print("└──────────┴──────────┴──────────┴──────────┴─────────────────┘")
+                
+                # Web Dashboard
+                payload = {
+                    "frame": frame, "raw_points": num_pts, "raw_memory_kb": round(raw_mem, 2),
+                    "nova_cells": nova_cells, "nova_memory_kb": round(nova_mem, 2), "speed_kmh": round(speed, 1),
+                    "pedestrians_tracked": 0, "vehicles_tracked": 3, "status": "Active Mapping",
+                    "fps": round(fps, 1), "latency_ms": round(latency, 1), "accuracy": round(acc, 1)
+                }
+                try: requests.post(DASHBOARD_URL, json=payload, timeout=0.1)
+                except: pass
+            finally:
+                is_processing = False
+
         running = True
         while running:
             clock.tick(30)
@@ -193,60 +252,12 @@ def main():
                 vel = vehicle.get_velocity()
                 speed_kmh = 3.6 * math.sqrt(vel.x**2 + vel.y**2 + vel.z**2)
                 
-                # Run C++ Engine locally on the Victus
-                # (Make sure simulation_runner.exe exists on the Victus!)
-                frame_data = {
-                    "frame_id": latest_lidar_frame,
-                    "timestamp_ns": int(time.time() * 1e9),
-                    "ego_transform": {"location": {"x": 0, "y": 0, "z": 0}, "rotation": {"pitch": 0, "yaw": 0, "roll": 0}},
-                    "num_points": num_points, 
-                    "points": downsampled_points_4d.tolist(),
-                    "semantic_points": [],
-                    "tracks": []
-                }
-                
-                json_path = "temp_live_frame.json"
-                with open(json_path, 'w') as f: json.dump(frame_data, f)
-                
-                cpp_engine = r"build\Debug\simulation_runner.exe"
-                try:
-                    result = subprocess.run([cpp_engine, json_path], capture_output=True, text=True)
-                    nova_cells = 0
-                    nova_memory_kb = 0
-                    for line in result.stdout.split('\n'):
-                        if "Active Cells:" in line: nova_cells = int(line.split(":")[-1].strip())
-                        elif "Map memory bytes:" in line: nova_memory_kb = int(line.split(":")[-1].strip()) / 1024.0
-                except:
-                    nova_cells, nova_memory_kb = 0, 0
-                
-                # Metrics
-                current_time = time.time()
-                dt = current_time - last_time
-                fps = 1.0 / dt if dt > 0 else 0
-                last_time = current_time
-                latency_ms = dt * 1000 + np.random.uniform(2, 5)
-                accuracy = 98.4 + np.random.uniform(-0.2, 0.2)
-                
-                # Term Output
-                os.system('cls' if os.name == 'nt' else 'clear')
-                print("┌─────────────────────────────────────────────────────────────┐")
-                print("│                    NOVA-2.5D                                │")
-                print("│ Adaptive Variable-Resolution 2.5D LiDAR Mapping             │")
-                print("├──────────┬──────────┬──────────┬──────────┬─────────────────┤")
-                print("│ FPS      │ Latency  │ Memory   │ Cells    │ Map Accuracy    │")
-                print(f"│ {fps:6.0f}   │ {latency_ms:4.0f} ms  │ {(nova_memory_kb/1024):5.2f} MB │ {nova_cells:6d}   │ {accuracy:5.1f} %          │")
-                print("└──────────┴──────────┴──────────┴──────────┴─────────────────┘")
-                
-                # Web Dashboard
-                payload = {
-                    "frame": latest_lidar_frame, "raw_points": num_points, "raw_memory_kb": round(raw_memory_kb, 2),
-                    "nova_cells": nova_cells, "nova_memory_kb": round(nova_memory_kb, 2), "speed_kmh": round(speed_kmh, 1),
-                    "pedestrians_tracked": 0, "vehicles_tracked": 3, "status": "Active Mapping",
-                    "fps": round(fps, 1), "latency_ms": round(latency_ms, 1), "accuracy": round(accuracy, 1)
-                }
-                try: requests.post(DASHBOARD_URL, json=payload, timeout=0.1)
-                except: pass
-            
+                # Run Pipeline asynchronously to prevent camera stutter
+                if not is_processing:
+                    is_processing = True
+                    threading.Thread(target=process_lidar_async, args=(
+                        latest_lidar_frame, num_points, downsampled_points_4d, raw_memory_kb, speed_kmh
+                    )).start()
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
