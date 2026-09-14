@@ -1,0 +1,38 @@
+{
+  "frame_id": 169752,
+  "timestamp": 2295.8368325717747,
+  "sensor_id": 27,
+  "vehicle_id": 26,
+  "point_count": 964,
+  "coordinate_frame": "sensor",
+  "sensor_transform": {
+    "location": {
+      "x": -58.368499755859375,
+      "y": 23.29290771484375,
+      "z": 2.401670217514038
+    },
+    "rotation": {
+      "pitch": 0.06391007453203201,
+      "yaw": -16.224870681762695,
+      "roll": 0.08016690611839294
+    }
+  },
+  "vehicle_transform": {
+    "location": {
+      "x": -58.36686706542969,
+      "y": 23.2889347076416,
+      "z": 0.001673965365625918
+    },
+    "rotation": {
+      "pitch": 0.06391007453203201,
+      "yaw": -16.224870681762695,
+      "roll": 0.08016690611839294
+    }
+  },
+  "lidar_configuration": {
+    "channels": 16,
+    "points_per_second": 28000,
+    "rotation_frequency": 10.0,
+    "range": 50.0
+  }
+}

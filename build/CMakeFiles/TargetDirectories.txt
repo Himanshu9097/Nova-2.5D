@@ -1,0 +1,5 @@
+E:/SIH/Nova-2.5D/build/CMakeFiles/mapping_lib.dir
+E:/SIH/Nova-2.5D/build/CMakeFiles/dummy_test.dir
+E:/SIH/Nova-2.5D/build/CMakeFiles/simulation_runner.dir
+E:/SIH/Nova-2.5D/build/CMakeFiles/ALL_BUILD.dir
+E:/SIH/Nova-2.5D/build/CMakeFiles/ZERO_CHECK.dir
