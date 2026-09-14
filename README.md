@@ -35,3 +35,5 @@ python simulation/carla_bridge.py
 ```powershell
 .\build\Debug\simulation_runner.exe carla_frame_0000.json
 ```
+
+powershell -ExecutionPolicy Bypass -File .\launch_sih_demo.ps1
