@@ -20,6 +20,9 @@ current_stats = {
     "status": "Waiting for CARLA..."
 }
 
+# Queue for commands from dashboard to Python Simulation
+pending_spawns = []
+
 def event_stream():
     """Server-Sent Events stream for the React frontend"""
     last_frame = -1
@@ -42,6 +45,26 @@ def update():
     if data:
         current_stats.update(data)
     return jsonify({"success": True})
+
+@app.route('/spawn', methods=['GET', 'POST'])
+def spawn():
+    """Endpoint for triggering new objects in the simulation"""
+    global pending_spawns
+    if request.method == 'POST':
+        # Dashboard wants to spawn something
+        data = request.json
+        if data:
+            pending_spawns.append(data)
+            return jsonify({"success": True, "message": f"Queued {data.get('type')} spawn at {data.get('distance')}m"})
+        return jsonify({"success": False})
+    
+    elif request.method == 'GET':
+        # Python script polling for new commands
+        if len(pending_spawns) > 0:
+            spawns_to_send = pending_spawns.copy()
+            pending_spawns.clear()
+            return jsonify({"spawns": spawns_to_send})
+        return jsonify({"spawns": []})
 
 if __name__ == '__main__':
     print("Starting Nova-2.5D Real-Time Dashboard Server on port 5000...")

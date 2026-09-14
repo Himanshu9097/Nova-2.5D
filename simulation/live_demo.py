@@ -19,6 +19,7 @@ args = parser.parse_args()
 HOST = args.carla_host
 PORT = 2000
 DASHBOARD_URL = f"http://{args.dashboard_host}:5000/update"
+SPAWN_URL = f"http://{args.dashboard_host}:5000/spawn"
 
 try:
     import carla
@@ -190,12 +191,20 @@ def main():
                     clustering = DBSCAN(eps=2.5, min_samples=10).fit(veh_points)
                     vehicles_tracked = len(set(clustering.labels_)) - (1 if -1 in clustering.labels_ else 0)
 
+                # --- ADAPTIVE COMPUTE FILTER (THE 20M RULE) ---
+                # We strictly drop static points that are > 20m away from computation.
+                # However, dynamic points (pedestrians/vehicles) are ALWAYS kept and tracked, regardless of distance!
+                dists = np.sqrt(pts_4d[:,0]**2 + pts_4d[:,1]**2)
+                is_dyn = (tags == 4) | (tags == 10)
+                keep = (dists <= 20.0) | is_dyn
+                pts_4d_filtered = pts_4d[keep]
+                
                 frame_data = {
                     "frame_id": frame,
                     "timestamp_ns": int(time.time() * 1e9),
                     "ego_transform": {"location": {"x": 0, "y": 0, "z": 0}, "rotation": {"pitch": 0, "yaw": 0, "roll": 0}},
-                    "num_points": num_pts, 
-                    "points": pts_4d.tolist(),
+                    "num_points": len(pts_4d_filtered), 
+                    "points": pts_4d_filtered.tolist(),
                     "semantic_points": [],
                     "tracks": []
                 }
@@ -247,6 +256,30 @@ def main():
         running = True
         while running:
             clock.tick(30)
+            
+            # --- WEB DASHBOARD SPAWN POLLING ---
+            try:
+                r = requests.get(SPAWN_URL, timeout=0.05)
+                if r.status_code == 200:
+                    spawns = r.json().get("spawns", [])
+                    for spawn in spawns:
+                        obj_type = spawn.get("type", "pedestrian")
+                        dist = float(spawn.get("distance", 20.0))
+                        
+                        if obj_type == "pedestrian": bp = blueprint_library.find('walker.pedestrian.0001'); z_off = 1.0; name = "Pedestrian"
+                        elif obj_type == "vehicle": bp = blueprint_library.find('vehicle.audi.tt'); z_off = 0.5; name = "Vehicle"
+                        elif obj_type == "wall": bp = blueprint_library.find('static.prop.streetbarrier'); z_off = 0.5; name = "Wall"
+                        else: continue
+                        
+                        transform = vehicle.get_transform()
+                        fwd = transform.get_forward_vector()
+                        spawn_loc = transform.location + carla.Location(x=fwd.x*dist, y=fwd.y*dist, z=z_off)
+                        actor = world.try_spawn_actor(bp, carla.Transform(spawn_loc, transform.rotation))
+                        if actor:
+                            actor_list.append(actor)
+                            print(f"WEB API SPAWN: {name} dropped {dist}m ahead!")
+            except:
+                pass # Ignore connection timeouts if polling too fast
             
             # 1. Handle Camera and CARLA API calls SAFELY on the main thread
             if auto_follow_camera:
