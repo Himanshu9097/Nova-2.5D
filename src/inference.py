@@ -593,6 +593,26 @@ class SemanticSegmentationModel:
         }
 
 
+_MODEL_CACHE = {}
+
+def get_cached_semantic_model(model_name: str = "pointnet_kasc",
+                               model_path: Optional[str] = None,
+                               device: Optional[str] = None,
+                               confidence_threshold: float = 0.5,
+                               label_set: str = "semantickitti") -> SemanticSegmentationModel:
+    global _MODEL_CACHE
+    key = (model_name, model_path, device, label_set)
+    if key not in _MODEL_CACHE:
+        _MODEL_CACHE[key] = SemanticSegmentationModel(
+            model_name=model_name,
+            model_path=model_path,
+            device=device,
+            confidence_threshold=confidence_threshold,
+            label_set=label_set
+        )
+    return _MODEL_CACHE[key]
+
+
 def semantic_inference(points: np.ndarray,
                       model_name: str = "pointnet_kasc",
                       model_path: Optional[str] = None,
@@ -600,27 +620,15 @@ def semantic_inference(points: np.ndarray,
                       device: Optional[str] = None,
                       label_set: str = "semantickitti") -> Dict:
     """
-    Convenience function for semantic segmentation inference.
-    
-    Args:
-        points: Point cloud array (N x 4)
-        model_name: Model type ("pointnet_kasc" or "randlanet")
-        model_path: Path to model checkpoint (for PointNet)
-        confidence_threshold: Confidence threshold
-        device: Device to use ('cuda', 'cpu', or None for auto)
-        label_set: Which label set to use
-        
-    Returns:
-        Dictionary with semantic segmentation results
+    Convenience function for semantic segmentation inference (cached for real-time speed).
     """
-    model = SemanticSegmentationModel(
+    model = get_cached_semantic_model(
         model_name=model_name,
         model_path=model_path,
         device=device,
         confidence_threshold=confidence_threshold,
         label_set=label_set
     )
-    
     return model.predict(points)
 
 

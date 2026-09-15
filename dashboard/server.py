@@ -14,38 +14,93 @@ current_stats = {
     "raw_memory_kb": 0,
     "nova_cells": 0,
     "nova_memory_kb": 0,
+    "cells_l0": 0,
+    "cells_l1": 0,
+    "cells_l2": 0,
     "speed_kmh": 0,
     "pedestrians_tracked": 0,
     "vehicles_tracked": 0,
-    "rmse_cm": 0,
+    "fps": 0.0,
+    "latency_ms": 0.0,
+    "accuracy": 0.0,
+    "rmse_cm": 0.0,
+    "ram_mb": 0.0,
+    "gpu_vram_mb": 0.0,
+    "prior_map_loaded": False,
+    "prior_map_name": "Town10HD_Opt",
+    "prior_map_cells": 0,
     "status": "Waiting for CARLA..."
 }
+
+stats_version = 0
 
 # Queue for commands from dashboard to Python Simulation
 pending_spawns = []
 
 def event_stream():
     """Server-Sent Events stream for the React frontend"""
-    last_frame = -1
+    global stats_version
+    last_version = -1
     while True:
-        # Only send updates if the frame has changed to avoid flooding
-        if current_stats["frame"] != last_frame:
+        # Send update immediately whenever ANY field in stats changes
+        if stats_version != last_version:
             yield f"data: {json.dumps(current_stats)}\n\n"
-            last_frame = current_stats["frame"]
-        time.sleep(0.1)
+            last_version = stats_version
+        time.sleep(0.05)
 
 @app.route('/stream')
 def stream():
-    return Response(event_stream(), mimetype="text/event-stream")
+    response = Response(event_stream(), mimetype="text/event-stream")
+    response.headers['Cache-Control'] = 'no-cache, no-transform'
+    response.headers['X-Accel-Buffering'] = 'no'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 @app.route('/update', methods=['POST'])
 def update():
     """Endpoint for the CARLA live script to post updates"""
-    global current_stats
+    global current_stats, stats_version
     data = request.json
     if data:
         current_stats.update(data)
+        stats_version += 1
     return jsonify({"success": True})
+
+# Video streaming buffers
+latest_camera_bytes = None
+latest_lidar_bytes = None
+
+@app.route('/upload_camera', methods=['POST'])
+def upload_camera():
+    global latest_camera_bytes
+    latest_camera_bytes = request.data
+    return jsonify({"success": True})
+
+@app.route('/upload_lidar', methods=['POST'])
+def upload_lidar():
+    global latest_lidar_bytes
+    latest_lidar_bytes = request.data
+    return jsonify({"success": True})
+
+@app.route('/camera_feed')
+def camera_feed():
+    def generate():
+        while True:
+            if latest_camera_bytes:
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + latest_camera_bytes + b'\r\n')
+            time.sleep(0.05)
+    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/lidar_feed')
+def lidar_feed():
+    def generate():
+        while True:
+            if latest_lidar_bytes:
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + latest_lidar_bytes + b'\r\n')
+            time.sleep(0.05)
+    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/spawn', methods=['GET', 'POST'])
 def spawn():
