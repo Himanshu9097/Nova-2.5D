@@ -27,16 +27,18 @@ HOST = args.carla_host
 PORT = 2000
 DASHBOARD_URL = f"http://{args.dashboard_host}:5000/update"
 SPAWN_URL = f"http://{args.dashboard_host}:5000/spawn"
-session = requests.Session()
+session = requests.Session()  # Main-thread session for synchronous calls only
 
 def async_post(url, data=None, json_data=None):
-    """Fire-and-forget non-blocking HTTP POST in background daemon thread"""
+    """Fire-and-forget non-blocking HTTP POST using a per-thread session (thread-safe)"""
     def _worker():
         try:
+            s = requests.Session()  # Each thread gets its own session to avoid race conditions
             if json_data is not None:
-                session.post(url, json=json_data, timeout=0.3)
+                s.post(url, json=json_data, timeout=0.3)
             elif data is not None:
-                session.post(url, data=data, timeout=0.3)
+                s.post(url, data=data, timeout=0.3)
+            s.close()
         except Exception:
             pass
     threading.Thread(target=_worker, daemon=True).start()
@@ -118,11 +120,19 @@ def main():
         
         world = client.get_world()
         
-        # Connect to remote Traffic Manager to fix autopilot
+        # Connect to Traffic Manager on the CARLA HOST (not localhost!)
+        # When running remotely, TM must bind to the server's IP, otherwise
+        # autopilot and apply_control() calls can silently deadlock.
         try:
             tm = client.get_trafficmanager(8000)
             tm.set_global_distance_to_leading_vehicle(2.0)
-        except Exception:
+            # If running remotely, set TM to remote mode so it doesn't try
+            # to run a local TM instance that conflicts with the server.
+            if HOST != '127.0.0.1' and HOST != 'localhost':
+                tm.set_synchronous_mode(False)
+            print(f"Traffic Manager connected on port {tm.get_port()}")
+        except Exception as e:
+            print(f"⚠️  Traffic Manager unavailable ({e}). Autopilot disabled, manual controls OK.")
             tm = None
         
         # Enable 3D Rendering on the server and ensure asynchronous mode
@@ -159,9 +169,21 @@ def main():
         
         actor_list.append(vehicle)
         vehicle.set_simulate_physics(True)
-        vehicle.set_autopilot(False)
-        # Release all locks/brakes
+        
+        # Explicitly disable autopilot without TM reference to avoid deadlock
+        try:
+            vehicle.set_autopilot(False)
+        except Exception:
+            pass
+        
+        # Release all locks/brakes and give a tiny throttle burst to confirm physics is alive
         vehicle.apply_control(carla.VehicleControl(throttle=0.0, steer=0.0, brake=0.0, hand_brake=False, manual_gear_shift=False))
+        time.sleep(0.1)
+        # Quick physics test: tiny forward nudge then release
+        vehicle.apply_control(carla.VehicleControl(throttle=0.3, steer=0.0, brake=0.0, hand_brake=False, manual_gear_shift=False))
+        time.sleep(0.15)
+        vehicle.apply_control(carla.VehicleControl(throttle=0.0, steer=0.0, brake=1.0, hand_brake=False, manual_gear_shift=False))
+        print("✅ Vehicle physics confirmed working.")
 
         # Teleport spectator to follow the car immediately on CARLA server
         spectator = world.get_spectator()
@@ -587,9 +609,12 @@ def main():
                         running = False
                     elif event.key == pygame.K_p:
                         autopilot_enabled = not autopilot_enabled
-                        if tm:
-                            vehicle.set_autopilot(autopilot_enabled, tm.get_port())
-                        else:
+                        try:
+                            if tm:
+                                vehicle.set_autopilot(autopilot_enabled, tm.get_port())
+                            else:
+                                vehicle.set_autopilot(autopilot_enabled)
+                        except Exception:
                             vehicle.set_autopilot(autopilot_enabled)
                         print(f"Autopilot toggled to: {autopilot_enabled}")
                     elif event.key == pygame.K_f:
@@ -635,9 +660,12 @@ def main():
                         running = False
                     elif event.button == 2: # X -> Autopilot
                         autopilot_enabled = not autopilot_enabled
-                        if tm:
-                            vehicle.set_autopilot(autopilot_enabled, tm.get_port())
-                        else:
+                        try:
+                            if tm:
+                                vehicle.set_autopilot(autopilot_enabled, tm.get_port())
+                            else:
+                                vehicle.set_autopilot(autopilot_enabled)
+                        except Exception:
                             vehicle.set_autopilot(autopilot_enabled)
                         print(f"Autopilot toggled to: {autopilot_enabled}")
                     elif event.button == 3: # Y -> Auto Follow Cam
@@ -673,9 +701,20 @@ def main():
             # Draw Window (Command Center Left Side)
             display.fill((10, 15, 30)) # Very dark navy
             
+            # Check if PyGame window has focus (controls only work when focused!)
+            window_focused = pygame.key.get_focused()
+            
             # Left Panel Background
             pygame.draw.rect(display, (15, 23, 42), (0, 0, 350, 600))
             pygame.draw.line(display, (59, 130, 246), (350, 0), (350, 600), 2)
+            
+            # Focus-loss warning banner
+            if not window_focused:
+                warning_surf = title_font.render("⚠ CLICK HERE FOR CONTROLS", True, (255, 60, 60))
+                bg_rect = pygame.Rect(10, 560, 330, 28)
+                pygame.draw.rect(display, (80, 0, 0), bg_rect)
+                pygame.draw.rect(display, (255, 60, 60), bg_rect, 2)
+                display.blit(warning_surf, (18, 563))
             
             # Real-time Telemetry lines on HUD
             text_lines = [
@@ -917,8 +956,8 @@ def main():
                     manual_gear_shift=False
                 ))
 
-            # Maintain stable 30 FPS and yield time slice to OS event loop
-            clock.tick(30)
+            # NOTE: clock.tick(30) is already called at the top of the loop (line ~450)
+            # Do NOT call it again here — double-calling halves the frame rate to ~15 FPS!
                 
     except KeyboardInterrupt:
         print("\nLive demo stopped by user.")
