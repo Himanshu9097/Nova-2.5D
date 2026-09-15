@@ -17,6 +17,7 @@ current_stats = {
     "speed_kmh": 0,
     "pedestrians_tracked": 0,
     "vehicles_tracked": 0,
+    "rmse_cm": 0,
     "status": "Waiting for CARLA..."
 }
 

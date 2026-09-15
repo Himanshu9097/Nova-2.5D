@@ -20,6 +20,7 @@ function App() {
     fps: 0,
     latency_ms: 0,
     accuracy: 0,
+    rmse_cm: 0,
     pedestrians_tracked: 0,
     vehicles_tracked: 0
   });
@@ -239,7 +240,7 @@ function App() {
       {/* System Performance Matrix */}
       <div className="mt-8 glass-panel p-8 rounded-3xl border border-blue-500/20">
         <h3 className="text-xl font-bold mb-6 text-slate-200">System Performance Matrix</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-800">
             <p className="text-slate-400 mb-1 text-sm font-semibold uppercase tracking-wider">Pipeline FPS</p>
             <p className="text-4xl font-mono text-white">{stats.fps.toFixed(1)} <span className="text-xl text-slate-500">Hz</span></p>
@@ -252,86 +253,135 @@ function App() {
             <p className="text-emerald-400/80 mb-1 text-sm font-semibold uppercase tracking-wider">Map Accuracy</p>
             <p className="text-4xl font-mono text-emerald-400">{stats.accuracy.toFixed(1)} <span className="text-xl">%</span></p>
           </div>
+          <div className="bg-slate-900/50 p-6 rounded-2xl border border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.05)]">
+            <p className="text-orange-400/80 mb-1 text-sm font-semibold uppercase tracking-wider">Elevation Error</p>
+            <p className="text-4xl font-mono text-orange-400">{(stats.rmse_cm || 0).toFixed(1)} <span className="text-xl">cm</span></p>
+          </div>
         </div>
       </div>
       </>) : (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-500">
           
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-black text-white mb-4">Why <span className="text-emerald-400">Nova-2.5D</span> is Different?</h2>
-            <p className="text-2xl text-emerald-400/80 italic font-light">"Map intelligently, not uniformly."</p>
+          <div className="text-center mb-8">
+            <h2 className="text-4xl font-black text-white mb-2">Why <span className="text-emerald-400">Nova-2.5D</span> is Different?</h2>
+            <p className="text-xl text-emerald-400/80 font-medium tracking-wide">Map intelligently, not uniformly.</p>
+          </div>
+
+          {/* Top Panel: Real World vs Raw Point Cloud */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Real World View placeholder */}
+            <div className="glass-panel rounded-2xl overflow-hidden border border-slate-700 bg-slate-900/50 h-80 relative flex items-center justify-center group">
+              <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-slate-950/80 to-transparent z-10">
+                <span className="bg-slate-800/80 text-white text-xs font-bold px-3 py-1 rounded">Real World View (CARLA Simulation)</span>
+              </div>
+              <div className="text-slate-600 flex flex-col items-center gap-2">
+                <Eye size={48} className="opacity-50" />
+                <p className="font-medium text-sm">[Insert CARLA Screenshot Here]</p>
+              </div>
+            </div>
+
+            {/* Raw LiDAR View placeholder */}
+            <div className="glass-panel rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 h-80 relative flex items-center justify-center group">
+              <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-slate-950/80 to-transparent z-10 flex justify-between items-start">
+                <span className="bg-slate-800/80 text-white text-xs font-bold px-3 py-1 rounded">Raw LiDAR Point Cloud (Bird's Eye View)</span>
+                <div className="bg-slate-800/80 p-2 rounded text-[10px] text-slate-300 font-medium space-y-1">
+                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-blue-400"></span> Road</div>
+                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-400"></span> Vehicle</div>
+                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-400"></span> Pedestrian</div>
+                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-purple-400"></span> Building</div>
+                </div>
+              </div>
+              <div className="text-slate-700 flex flex-col items-center gap-2">
+                <Activity size={48} className="opacity-50" />
+                <p className="font-medium text-sm">[Insert Point Cloud Image Here]</p>
+              </div>
+            </div>
           </div>
 
           {/* Infographic 3-Panel Grids */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             
             {/* Panel 1 */}
-            <div className="glass-panel p-6 rounded-3xl border border-slate-800 relative">
-              <h3 className="text-xl font-bold text-white mb-1">1. Traditional Uniform</h3>
-              <p className="text-slate-400 text-sm mb-6">Same resolution everywhere. Wastes compute.</p>
-              
-              <div className="aspect-square bg-[#1a202c] rounded-xl border border-slate-700 grid grid-cols-10 grid-rows-10 gap-0.5 p-2 opacity-50 relative overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-red-500/20 text-red-400 p-4 rounded-xl border border-red-500/50 backdrop-blur-md text-center font-bold">
-                    100% Compute Overhead<br/>Grid Size: 10cm everywhere
+            <div className="glass-panel p-5 rounded-2xl border border-slate-700 flex flex-col justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-white mb-1">1. Traditional Uniform Mapping</h3>
+                <p className="text-slate-400 text-xs mb-4">(Same resolution everywhere)</p>
+                
+                <div className="aspect-video bg-[#1a202c] rounded-lg border border-slate-600 mb-4 flex items-end p-2 relative overflow-hidden group">
+                  <div className="absolute inset-0 grid grid-cols-12 grid-rows-8 gap-px opacity-40">
+                    {Array.from({length: 96}).map((_, i) => <div key={i} className="bg-slate-400"></div>)}
+                  </div>
+                  <div className="relative z-10 bg-slate-900/90 border border-slate-700 p-2 rounded text-[10px] text-slate-300 ml-auto shadow-lg backdrop-blur-sm">
+                    <p className="font-bold mb-1">Grid Size: 10 cm (uniform)</p>
+                    <p>Total Cells: 1,000,000</p>
+                    <p>Memory Usage: ~500 MB</p>
                   </div>
                 </div>
-                {Array.from({length: 100}).map((_, i) => (
-                  <div key={i} className="bg-blue-500/20 rounded-sm"></div>
-                ))}
+              </div>
+              
+              <div className="flex items-start gap-3 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                <div className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">X</div>
+                <p className="text-xs text-red-200">Wastes memory and computation on less important areas.</p>
               </div>
             </div>
 
             {/* Panel 2 */}
-            <div className="glass-panel p-6 rounded-3xl border border-slate-800 relative">
-              <h3 className="text-xl font-bold text-white mb-1">2. Distance-based Mapping</h3>
-              <p className="text-slate-400 text-sm mb-6">Ignores semantic importance of objects.</p>
-              
-              <div className="aspect-square bg-[#1a202c] rounded-xl border border-slate-700 grid grid-cols-10 grid-rows-10 gap-0.5 p-2 opacity-70 relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-orange-500/20 text-orange-400 p-4 rounded-xl border border-orange-500/50 backdrop-blur-md text-center font-bold">
-                    Drops distant objects completely!
+            <div className="glass-panel p-5 rounded-2xl border border-slate-700 flex flex-col justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-white mb-1">2. Distance-based Mapping</h3>
+                <p className="text-slate-400 text-xs mb-4">(Resolution changes only with distance)</p>
+                
+                <div className="aspect-video bg-[#1a202c] rounded-lg border border-slate-600 mb-4 flex items-end p-2 relative overflow-hidden group">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-40">
+                    {/* Fake concentric distance rings */}
+                    <div className="w-[120%] h-[120%] border-[20px] border-slate-600 rounded-full"></div>
+                    <div className="absolute w-[80%] h-[80%] border-[20px] border-slate-500 rounded-full"></div>
+                    <div className="absolute w-[40%] h-[40%] border-[20px] border-slate-400 rounded-full"></div>
+                  </div>
+                  <div className="relative z-10 bg-slate-900/90 border border-slate-700 p-2 rounded text-[10px] text-slate-300 ml-auto shadow-lg backdrop-blur-sm">
+                    <p className="font-bold text-blue-300">Near (0-10 m): 5 cm</p>
+                    <p className="font-bold text-blue-400">Mid (10-25 m): 10 cm</p>
+                    <p className="font-bold text-blue-500 mb-1">Far (25-50 m): 25 cm</p>
+                    <p>Total Cells: 400,000</p>
+                    <p>Memory Usage: ~200 MB</p>
                   </div>
                 </div>
-                {Array.from({length: 100}).map((_, i) => {
-                  const isCenter = (i % 10 >= 3 && i % 10 <= 6) && (Math.floor(i/10) >= 3 && Math.floor(i/10) <= 6);
-                  return <div key={i} className={`rounded-sm ${isCenter ? 'bg-blue-500/30' : 'bg-slate-700/30 col-span-2 row-span-2'}`}></div>
-                })}
+              </div>
+
+              <div className="flex items-start gap-3 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                <div className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">X</div>
+                <p className="text-xs text-red-200">Considers only distance, ignores what the object actually is.</p>
               </div>
             </div>
 
             {/* Panel 3 */}
-            <div className="glass-panel p-6 rounded-3xl border border-emerald-500/50 relative shadow-[0_0_30px_rgba(16,185,129,0.1)]">
-              <h3 className="text-xl font-bold text-emerald-400 mb-1">3. Nova-2.5D (Ours)</h3>
-              <p className="text-emerald-200/80 text-sm mb-6">Distance + Semantic + Dynamic Tracking</p>
-              
-              <div className="aspect-square bg-[#1a202c] rounded-xl border border-emerald-500/30 p-2 relative">
-                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
-                    <div className="bg-emerald-500/20 text-emerald-400 p-3 rounded-xl border border-emerald-500/50 backdrop-blur-md text-center font-bold mb-4 shadow-lg">
-                      Finer where it matters.<br/>Coarser where it doesn't.
-                    </div>
-                 </div>
-                 {/* Simulate the adaptive grid */}
-                 <div className="w-full h-full relative">
-                    {/* Background coarse grid */}
-                    <div className="absolute inset-0 grid grid-cols-5 grid-rows-5 gap-1 opacity-20">
-                      {Array.from({length: 25}).map((_, i) => <div key={i} className="bg-blue-300 rounded-sm"></div>)}
-                    </div>
-                    {/* Center fine grid (ego vehicle) */}
-                    <div className="absolute left-1/4 right-1/4 top-1/4 bottom-1/4 grid grid-cols-10 grid-rows-10 gap-px opacity-60">
-                      {Array.from({length: 100}).map((_, i) => <div key={i} className="bg-blue-400 rounded-[1px]"></div>)}
-                    </div>
-                    
-                    {/* Distant Spawns Representation */}
-                    {(stats.pedestrians_tracked > 0 || stats.vehicles_tracked > 0) && (
-                      <div className="absolute top-2 left-2 w-1/4 h-1/4 grid grid-cols-5 grid-rows-5 gap-px border border-red-500/50 bg-red-500/10 p-1 rounded-md animate-pulse">
-                         <div className="absolute -top-6 -left-2 text-xs text-red-400 font-bold whitespace-nowrap bg-slate-900 px-2 py-1 rounded">
-                           Tracked Target!
-                         </div>
-                         {Array.from({length: 25}).map((_, i) => <div key={i} className="bg-red-500/40 rounded-[1px]"></div>)}
-                      </div>
-                    )}
-                 </div>
+            <div className="glass-panel p-5 rounded-2xl border border-emerald-500/40 bg-emerald-950/20 flex flex-col justify-between shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+              <div>
+                <h3 className="text-lg font-bold text-emerald-400 mb-1">3. Nova-2.5D (Ours)</h3>
+                <p className="text-emerald-300/70 text-xs mb-4">(Distance + Semantic + Dynamic + Uncertainty)</p>
+                
+                <div className="aspect-video bg-[#0f172a] rounded-lg border border-emerald-500/30 mb-4 flex items-end p-2 relative overflow-hidden group">
+                  <div className="absolute inset-0 grid grid-cols-12 grid-rows-8 gap-px opacity-30">
+                     {/* Adaptive grid simulation */}
+                     {Array.from({length: 96}).map((_, i) => {
+                       const isTarget = i === 44 || i === 45 || i === 56 || i === 57;
+                       return <div key={i} className={isTarget ? "bg-emerald-400" : "bg-slate-600"}></div>
+                     })}
+                  </div>
+                  <div className="relative z-10 bg-slate-900/90 border border-emerald-500/50 p-2 rounded text-[10px] text-emerald-200 ml-auto shadow-lg backdrop-blur-sm">
+                    <p className="font-bold mb-1">Pedestrian (dynamic): 5 cm</p>
+                    <p className="text-slate-300">Vehicle: 10 cm</p>
+                    <p className="text-slate-300">Road (static): 25 cm</p>
+                    <p className="text-slate-300 mb-1">Building (far): 50 cm</p>
+                    <p className="font-medium text-emerald-400">Total Cells: 120,000</p>
+                    <p className="font-medium text-emerald-400">Memory Usage: ~60 MB</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/30">
+                <div className="bg-emerald-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                <p className="text-xs text-emerald-200 font-medium">Finer where it matters,<br/>Coarser where it doesn't.</p>
               </div>
             </div>
 
