@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Activity, HardDrive, Cpu, Zap, Car, Eye, Map, Sliders } from 'lucide-react';
+import { Activity, HardDrive, Cpu, Zap, Car, Eye, Map, Sliders, Play, Settings } from 'lucide-react';
+import RadarBEV from './RadarBEV';
 import './index.css';
 
 function App() {
@@ -332,28 +333,17 @@ function App() {
               </div>
             </div>
 
-            {/* Raw LiDAR View */}
-            <div className="glass-panel rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 h-80 relative flex items-center justify-center group shadow-xl">
-              <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-slate-950/90 to-transparent z-10 flex justify-between items-start">
-                <span className="bg-slate-800/90 text-white text-xs font-bold px-3 py-1 rounded flex items-center gap-1.5 border border-slate-700 backdrop-blur-sm">
-                  <Activity size={14} className="text-blue-400" /> Raw LiDAR Point Cloud (Bird's Eye View)
+            {/* Raw LiDAR View -> Now Radar BEV */}
+            <div className="glass-panel rounded-2xl overflow-hidden border border-slate-700 bg-[#040810] h-80 relative flex items-center justify-center group shadow-xl">
+              <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-[#040810]/90 to-transparent z-10 flex justify-between items-start pointer-events-none">
+                <span className="bg-slate-800/90 text-white text-xs font-bold px-3 py-1 rounded flex items-center gap-1.5 border border-slate-700 backdrop-blur-sm shadow-lg">
+                  <Activity size={14} className="text-blue-400" /> Real-time LiDAR BEV
                 </span>
-                <div className="bg-slate-900/90 p-2 rounded-lg text-[10px] text-slate-300 font-medium space-y-1 border border-slate-800 backdrop-blur-sm shadow-lg">
-                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-blue-400"></span> Road (Static)</div>
-                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-600"></span> Vehicle (Dark Red Dynamic)</div>
-                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-400"></span> Pedestrian (Dynamic)</div>
-                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-slate-400"></span> Building (Prior)</div>
-                </div>
+                <span className="text-[10px] bg-blue-500/20 text-blue-300 font-mono px-2 py-0.5 rounded border border-blue-500/30 flex items-center gap-1 backdrop-blur-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span> LIVE SSE STREAM
+                </span>
               </div>
-              <img 
-                src={`http://${window.location.hostname}:5000/lidar_feed`}
-                onError={(e) => { e.target.onerror = null; e.target.src = '/carla_lidar_bev.jpg'; }}
-                className="w-full h-full object-contain p-2 bg-slate-950"
-                alt="Raw LiDAR Point Cloud"
-              />
-              <div className="absolute bottom-2 left-2 bg-slate-950/85 px-2.5 py-1 rounded text-[11px] text-slate-300 font-mono flex items-center gap-2 border border-slate-800 backdrop-blur-sm">
-                <span className="w-2 h-2 rounded-full bg-blue-400"></span> 360° 32-Channel Semantic LiDAR Stream
-              </div>
+              <RadarBEV stats={stats} />
             </div>
           </div>
 

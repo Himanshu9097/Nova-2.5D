@@ -2,6 +2,7 @@ from flask import Flask, Response, request, jsonify
 from flask_cors import CORS
 import time
 import json
+import base64
 import threading
 
 app = Flask(__name__)
@@ -81,6 +82,36 @@ def upload_lidar():
     global latest_lidar_bytes
     latest_lidar_bytes = request.data
     return jsonify({"success": True})
+
+# Binary point cloud buffer for Canvas BEV visualization
+latest_pointcloud_bytes = None
+pointcloud_version = 0
+
+@app.route('/upload_pointcloud', methods=['POST'])
+def upload_pointcloud():
+    global latest_pointcloud_bytes, pointcloud_version
+    latest_pointcloud_bytes = request.data
+    pointcloud_version += 1
+    return jsonify({"success": True})
+
+def pointcloud_event_stream():
+    """SSE stream that broadcasts binary point cloud as base64"""
+    global pointcloud_version
+    last_ver = -1
+    while True:
+        if pointcloud_version != last_ver and latest_pointcloud_bytes:
+            b64 = base64.b64encode(latest_pointcloud_bytes).decode('ascii')
+            yield f"data: {b64}\n\n"
+            last_ver = pointcloud_version
+        time.sleep(0.05)
+
+@app.route('/pointcloud_stream')
+def pointcloud_stream():
+    response = Response(pointcloud_event_stream(), mimetype="text/event-stream")
+    response.headers['Cache-Control'] = 'no-cache, no-transform'
+    response.headers['X-Accel-Buffering'] = 'no'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 @app.route('/camera_feed')
 def camera_feed():

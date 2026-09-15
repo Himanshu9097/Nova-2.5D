@@ -12,6 +12,7 @@ import requests
 import math
 import subprocess
 import json
+import struct
 import traceback
 import argparse
 import threading
@@ -27,6 +28,7 @@ HOST = args.carla_host
 PORT = 2000
 DASHBOARD_URL = f"http://{args.dashboard_host}:5000/update"
 SPAWN_URL = f"http://{args.dashboard_host}:5000/spawn"
+POINTCLOUD_URL = f"http://{args.dashboard_host}:5000/upload_pointcloud"
 session = requests.Session()  # Main-thread session for synchronous calls only
 
 def async_post(url, data=None, json_data=None):
@@ -437,6 +439,20 @@ def main():
                     "prior_map_cells": prior_map.get_total_cells()
                 }
                 async_post(DASHBOARD_URL, json_data=payload)
+
+                # Stream compact binary point cloud for Canvas BEV visualization
+                # Format: [uint32 N][float16 x, float16 y, uint8 tag] × N
+                # ~5 bytes/point × ~3750 points = ~18.75 KB/frame
+                try:
+                    pc_x = pts_4d[:, 0].astype(np.float16)
+                    pc_y = pts_4d[:, 1].astype(np.float16)
+                    pc_t = np.clip(tags, 0, 255).astype(np.uint8)
+                    n = len(pc_x)
+                    buf = struct.pack('<I', n)  # 4-byte little-endian point count
+                    buf += pc_x.tobytes() + pc_y.tobytes() + pc_t.tobytes()
+                    async_post(POINTCLOUD_URL, data=buf)
+                except Exception:
+                    pass
             except Exception:
                 pass
             finally:
