@@ -705,8 +705,8 @@ def main():
             window_focused = pygame.key.get_focused()
             
             # Left Panel Background
-            pygame.draw.rect(display, (15, 23, 42), (0, 0, 350, 600))
-            pygame.draw.line(display, (59, 130, 246), (350, 0), (350, 600), 2)
+            pygame.draw.rect(display, (20, 30, 50), (0, 0, 350, 600))
+            pygame.draw.line(display, (50, 100, 200), (350, 0), (350, 600), 2)
             
             # Focus-loss warning banner
             if not window_focused:
@@ -716,39 +716,33 @@ def main():
                 pygame.draw.rect(display, (255, 60, 60), bg_rect, 2)
                 display.blit(warning_surf, (18, 563))
             
-            # Real-time Telemetry lines on HUD
+            # Original compact control panel
             text_lines = [
                 "NOVA-2.5D COMMAND CENTER",
                 "",
                 f"Mode: {'AUTOPILOT (AI)' if autopilot_enabled else 'MANUAL DRIVING'}",
-                f"Speed: {speed_kmh:.1f} km/h",
-                f"Gear : {'REVERSE (R)' if reverse else 'DRIVE (D)'}",
                 "",
-                "🎮 Controller Active" if len(joysticks) > 0 else "⌨ Keyboard Active (W/A/S/D)",
-                f"Throttle: {throttle*100:.0f}% | Steer: {steer:.2f}",
+                "🎮 Controller Active" if len(joysticks) > 0 else "⌨ Keyboard Active",
+                "Accel: W / Btn A",
+                "Brake: S / Btn B",
+                "Steer: A, D / Stick",
+                "AI   : P / Btn X",
                 "",
-                "--- DRIVING CONTROLS ---",
-                "W / Up   : Accelerate Forward",
-                "S / Down : Reverse / Brake",
-                "A / D    : Steer Left / Right",
-                "Space    : Handbrake",
-                "P / BtnX : Toggle Autopilot",
-                "F        : Toggle Follow Camera",
-                "C        : Snap Camera to Car",
-                "",
-                "--- LIVE SPAWN ---",
-                "1: Pothole (10m) | 2: Pedestrian (15m)",
-                "3: Vehicle (25m) | 4: Concrete Wall",
-                "Q: Quit Demo"
+                "--- LIVE SPAWNING ---",
+                "1 / Up : Pothole",
+                "2 / LB : Pedestrian",
+                "3 / RB : Parked Car",
+                "4      : Wall",
+                "5      : Building"
             ]
             for i, line in enumerate(text_lines):
-                color = (16, 185, 129) if "AUTOPILOT" in line or "DRIVE" in line else (255, 255, 255)
-                if "MANUAL" in line or "REVERSE" in line: color = (239, 68, 68)
-                if "LIVE" in line or "DRIVING" in line: color = (250, 204, 21)
+                color = (16, 185, 129) if "AUTOPILOT" in line else (255, 255, 255)
+                if "MANUAL" in line: color = (239, 68, 68)
+                if "LIVE" in line: color = (250, 204, 21)
                 
                 f = title_font if i == 0 else font
                 surface = f.render(line, True, color)
-                display.blit(surface, (18, 12 + i * (24 if i==0 else 18)))
+                display.blit(surface, (20, 15 + i * (25 if i==0 else 20)))
                 
             # Right Panel - REAL 3D SEMANTIC LIDAR MAPPING DISPLAY
             title_surf = title_font.render("NOVA-2.5D REAL 3D LIDAR BEV MAPPING", True, (0, 230, 255))
