@@ -82,8 +82,9 @@ def main():
             tm = None
         
         # [OPTIMIZATION] Disable 3D Rendering on the server to massively save GPU memory
+        # user requested to keep rendering ON
         settings = world.get_settings()
-        settings.no_rendering_mode = True
+        settings.no_rendering_mode = False
         world.apply_settings(settings)
         
         print(f"Using Default Map: {world.get_map().name} to prevent memory crashes.")
