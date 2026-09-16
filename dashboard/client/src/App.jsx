@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Activity, HardDrive, Cpu, Zap, Car, Eye, Map, Sliders, Play, Settings } from 'lucide-react';
 import RadarBEV from './RadarBEV';
+import VehicleControl from './VehicleControl';
 import './index.css';
 
 function App() {
@@ -199,6 +200,8 @@ function App() {
 
       </div>
 
+      {/* VEHICLE CONTROL PANEL */}
+      <VehicleControl />
 
       {/* Main Content Areas */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">

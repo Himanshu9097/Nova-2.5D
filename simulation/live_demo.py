@@ -498,7 +498,7 @@ def main():
                     rc = session.get(CONTROL_URL, timeout=0.5)
                     if rc.status_code == 200:
                         data = rc.json()
-                        nonlocal remote_control_state
+                        global remote_control_state
                         remote_control_state = data.get("control")
                         cmds = data.get("commands", [])
                         if cmds:
