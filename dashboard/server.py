@@ -38,15 +38,6 @@ stats_version = 0
 # Queue for commands from dashboard to Python Simulation
 pending_spawns = []
 
-# Control State Buffer
-latest_web_control = {
-    "throttle": 0.0,
-    "steer": 0.0,
-    "brake": 0.0,
-    "reverse": False,
-    "timestamp": 0.0
-}
-pending_commands = []
 
 def event_stream():
     """Server-Sent Events stream for the React frontend"""
@@ -81,14 +72,16 @@ def update():
 latest_camera_bytes = None
 latest_lidar_bytes = None
 
-@app.route('/upload_camera', methods=['POST'])
+@app.route('/upload_camera', methods=['POST', 'OPTIONS'])
 def upload_camera():
+    if request.method == 'OPTIONS': return jsonify({})
     global latest_camera_bytes
     latest_camera_bytes = request.data
     return jsonify({"success": True})
 
-@app.route('/upload_lidar', methods=['POST'])
+@app.route('/upload_lidar', methods=['POST', 'OPTIONS'])
 def upload_lidar():
+    if request.method == 'OPTIONS': return jsonify({})
     global latest_lidar_bytes
     latest_lidar_bytes = request.data
     return jsonify({"success": True})
@@ -97,8 +90,9 @@ def upload_lidar():
 latest_pointcloud_bytes = None
 pointcloud_version = 0
 
-@app.route('/upload_pointcloud', methods=['POST'])
+@app.route('/upload_pointcloud', methods=['POST', 'OPTIONS'])
 def upload_pointcloud():
+    if request.method == 'OPTIONS': return jsonify({})
     global latest_pointcloud_bytes, pointcloud_version
     latest_pointcloud_bytes = request.data
     pointcloud_version += 1
@@ -143,9 +137,10 @@ def lidar_feed():
             time.sleep(0.05)
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/spawn', methods=['GET', 'POST'])
+@app.route('/spawn', methods=['GET', 'POST', 'OPTIONS'])
 def spawn():
     """Endpoint for triggering new objects in the simulation"""
+    if request.method == 'OPTIONS': return jsonify({})
     global pending_spawns
     if request.method == 'POST':
         # Dashboard wants to spawn something
@@ -163,45 +158,7 @@ def spawn():
             return jsonify({"spawns": spawns_to_send})
         return jsonify({"spawns": []})
 
-@app.route('/control', methods=['POST', 'OPTIONS'])
-def web_control():
-    """Receive continuous control inputs from React Dashboard"""
-    if request.method == 'OPTIONS':
-        return jsonify({"success": True}), 200
-    global latest_web_control
-    data = request.json
-    if data:
-        latest_web_control["throttle"] = float(data.get("throttle", 0.0))
-        latest_web_control["steer"] = float(data.get("steer", 0.0))
-        latest_web_control["brake"] = float(data.get("brake", 0.0))
-        latest_web_control["reverse"] = bool(data.get("reverse", False))
-        latest_web_control["timestamp"] = time.time()
-        return jsonify({"success": True})
-    return jsonify({"success": False})
 
-@app.route('/control/command', methods=['POST', 'OPTIONS'])
-def web_command():
-    """Receive discrete vehicle commands from React Dashboard"""
-    if request.method == 'OPTIONS':
-        return jsonify({"success": True}), 200
-    global pending_commands
-    data = request.json
-    if data and "command" in data:
-        pending_commands.append(data["command"])
-        return jsonify({"success": True})
-    return jsonify({"success": False})
-
-@app.route('/control/poll', methods=['GET'])
-def control_poll():
-    """Simulation requests latest control state and any pending commands"""
-    global pending_commands
-    cmds_to_send = pending_commands.copy()
-    pending_commands.clear()
-    
-    return jsonify({
-        "control": latest_web_control,
-        "commands": cmds_to_send
-    })
 
 if __name__ == '__main__':
     print("Starting Nova-2.5D Real-Time Dashboard Server on port 5000...")
