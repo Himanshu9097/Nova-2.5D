@@ -6,7 +6,7 @@ import base64
 import threading
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Global state to hold the latest stats from CARLA
 current_stats = {
@@ -163,9 +163,11 @@ def spawn():
             return jsonify({"spawns": spawns_to_send})
         return jsonify({"spawns": []})
 
-@app.route('/control', methods=['POST'])
+@app.route('/control', methods=['POST', 'OPTIONS'])
 def web_control():
     """Receive continuous control inputs from React Dashboard"""
+    if request.method == 'OPTIONS':
+        return jsonify({"success": True}), 200
     global latest_web_control
     data = request.json
     if data:
@@ -177,9 +179,11 @@ def web_control():
         return jsonify({"success": True})
     return jsonify({"success": False})
 
-@app.route('/control/command', methods=['POST'])
+@app.route('/control/command', methods=['POST', 'OPTIONS'])
 def web_command():
     """Receive discrete vehicle commands from React Dashboard"""
+    if request.method == 'OPTIONS':
+        return jsonify({"success": True}), 200
     global pending_commands
     data = request.json
     if data and "command" in data:
