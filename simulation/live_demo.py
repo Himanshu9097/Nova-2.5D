@@ -93,8 +93,17 @@ def main():
         # 1. Spawn Ego Vehicle
         vehicle_bp = blueprint_library.find('vehicle.tesla.model3')
         spawn_points = world.get_map().get_spawn_points()
-        spawn_point = spawn_points[1] # Choose a good straightaway in Town03
-        vehicle = world.try_spawn_actor(vehicle_bp, spawn_point)
+        
+        vehicle = None
+        for sp in spawn_points:
+            vehicle = world.try_spawn_actor(vehicle_bp, sp)
+            if vehicle is not None:
+                break
+                
+        if vehicle is None:
+            print("ERROR: Could not spawn vehicle anywhere. The map is crowded or CARLA is glitched.")
+            sys.exit(1)
+            
         actor_list.append(vehicle)
         
         # Turn OFF autopilot initially so you can manually drive
@@ -591,7 +600,7 @@ def main():
     finally:
         print("Cleaning up actors...")
         for actor in reversed(actor_list):
-            if actor.is_alive:
+            if actor and actor.is_alive:
                 actor.destroy()
         
         try:
