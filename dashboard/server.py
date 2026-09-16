@@ -38,6 +38,16 @@ stats_version = 0
 # Queue for commands from dashboard to Python Simulation
 pending_spawns = []
 
+# Control State Buffer
+latest_web_control = {
+    "throttle": 0.0,
+    "steer": 0.0,
+    "brake": 0.0,
+    "reverse": False,
+    "timestamp": 0.0
+}
+pending_commands = []
+
 def event_stream():
     """Server-Sent Events stream for the React frontend"""
     global stats_version
@@ -152,6 +162,42 @@ def spawn():
             pending_spawns.clear()
             return jsonify({"spawns": spawns_to_send})
         return jsonify({"spawns": []})
+
+@app.route('/control', methods=['POST'])
+def web_control():
+    """Receive continuous control inputs from React Dashboard"""
+    global latest_web_control
+    data = request.json
+    if data:
+        latest_web_control["throttle"] = float(data.get("throttle", 0.0))
+        latest_web_control["steer"] = float(data.get("steer", 0.0))
+        latest_web_control["brake"] = float(data.get("brake", 0.0))
+        latest_web_control["reverse"] = bool(data.get("reverse", False))
+        latest_web_control["timestamp"] = time.time()
+        return jsonify({"success": True})
+    return jsonify({"success": False})
+
+@app.route('/control/command', methods=['POST'])
+def web_command():
+    """Receive discrete vehicle commands from React Dashboard"""
+    global pending_commands
+    data = request.json
+    if data and "command" in data:
+        pending_commands.append(data["command"])
+        return jsonify({"success": True})
+    return jsonify({"success": False})
+
+@app.route('/control/poll', methods=['GET'])
+def control_poll():
+    """Simulation requests latest control state and any pending commands"""
+    global pending_commands
+    cmds_to_send = pending_commands.copy()
+    pending_commands.clear()
+    
+    return jsonify({
+        "control": latest_web_control,
+        "commands": cmds_to_send
+    })
 
 if __name__ == '__main__':
     print("Starting Nova-2.5D Real-Time Dashboard Server on port 5000...")

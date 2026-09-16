@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Activity, HardDrive, Cpu, Zap, Car, Eye, Map, Sliders, Play, Settings } from 'lucide-react';
 import RadarBEV from './RadarBEV';
+import VehicleControl from './VehicleControl';
 import './index.css';
 
 function App() {
@@ -199,8 +200,11 @@ function App() {
 
       </div>
 
-      {/* Graph and Vehicle Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* VEHICLE CONTROL PANEL */}
+      <VehicleControl />
+
+      {/* Main Content Areas */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
         
         {/* Chart */}
         <div className="lg:col-span-2 glass-panel p-8 rounded-3xl">
@@ -248,8 +252,8 @@ function App() {
                 <span className="text-red-300 font-semibold flex items-center gap-2 text-sm">
                   <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span> Dynamic Targets
                 </span>
-                <span className="text-sm font-bold font-mono text-red-200">
-                  {stats.pedestrians_tracked} Ped, {stats.vehicles_tracked} Veh
+                <span className="text-xl font-bold text-red-400 font-mono">
+                  {(stats.pedestrians_tracked || 0) + (stats.vehicles_tracked || 0)}
                 </span>
               </div>
             </div>

@@ -29,6 +29,7 @@ PORT = 2000
 DASHBOARD_URL = f"http://{args.dashboard_host}:5000/update"
 SPAWN_URL = f"http://{args.dashboard_host}:5000/spawn"
 POINTCLOUD_URL = f"http://{args.dashboard_host}:5000/upload_pointcloud"
+CONTROL_URL = f"http://{args.dashboard_host}:5000/control/poll"
 session = requests.Session()  # Main-thread session for synchronous calls only
 
 def async_post(url, data=None, json_data=None):
@@ -462,35 +463,119 @@ def main():
         current_cam_yaw = None
         current_cam_pitch = -12.0
         last_lidar_post = 0.0
-        throttle = 0.0
-        steer = 0.0
-        brake = 0.0
-        reverse = False
         speed_kmh = 0.0
         running = True
         
-        # Background spawn poller thread (zero latency on main thread)
+        # --- UNIFIED CONTROL STATE ---
+        class ControlState:
+            def __init__(self):
+                self.throttle = 0.0
+                self.steer = 0.0
+                self.brake = 0.0
+                self.reverse = False
+                self.e_stop = False
+                self.source = "KEYBOARD"
+                self.last_web_time = 0.0
+        
+        ctrl = ControlState()
+        
+        # Background spawn & control poller thread (zero latency on main thread)
         pending_remote_spawns = []
-        def _spawn_poll_worker():
+        pending_remote_commands = []
+        remote_control_state = None
+        
+        def _poll_worker():
             while running:
                 try:
+                    # Poll Spawns
                     r = session.get(SPAWN_URL, timeout=0.5)
                     if r.status_code == 200:
                         spawns = r.json().get("spawns", [])
                         if spawns:
                             pending_remote_spawns.extend(spawns)
+                    
+                    # Poll Controls
+                    rc = session.get(CONTROL_URL, timeout=0.5)
+                    if rc.status_code == 200:
+                        data = rc.json()
+                        global remote_control_state
+                        remote_control_state = data.get("control")
+                        cmds = data.get("commands", [])
+                        if cmds:
+                            pending_remote_commands.extend(cmds)
                 except Exception:
                     pass
-                time.sleep(1.0)
-        threading.Thread(target=_spawn_poll_worker, daemon=True).start()
-
+                time.sleep(0.05) # 20 Hz polling
+                
+        threading.Thread(target=_poll_worker, daemon=True).start()
+        
         while running:
             clock.tick(30)
+            
+            # --- PROCESS REMOTE COMMANDS ---
+            while pending_remote_commands:
+                cmd = pending_remote_commands.pop(0)
+                if cmd == "e_stop":
+                    ctrl.e_stop = True
+                    autopilot_enabled = False
+                    print("⚠️ EMERGENCY STOP ACTIVATED VIA WEB")
+                elif cmd == "release_stop":
+                    ctrl.e_stop = False
+                    print("✅ EMERGENCY STOP RELEASED VIA WEB")
+                elif cmd == "toggle_autopilot":
+                    autopilot_enabled = not autopilot_enabled
+                    print(f"Autopilot toggled via Web: {autopilot_enabled}")
+                elif cmd == "camera_follow":
+                    auto_follow_camera = not auto_follow_camera
+                elif cmd == "camera_snap":
+                    veh_transform = vehicle.get_transform()
+                    veh_fwd = veh_transform.get_forward_vector()
+                    current_cam_loc = veh_transform.location - carla.Location(x=veh_fwd.x * 6.5, y=veh_fwd.y * 6.5, z=-2.8)
+                    current_cam_yaw = veh_transform.rotation.yaw
+                    spectator.set_transform(carla.Transform(current_cam_loc, carla.Rotation(pitch=current_cam_pitch, yaw=current_cam_yaw, roll=0.0)))
+                elif cmd == "reset_vehicle":
+                    autopilot_enabled = False
+                    ctrl.throttle = 0.0
+                    ctrl.steer = 0.0
+                    ctrl.brake = 1.0
+                    ctrl.e_stop = False
+                    try:
+                        wp = world.get_map().get_waypoint(vehicle.get_location())
+                        if wp:
+                            spawn_pt = wp.transform
+                            spawn_pt.location.z += 1.0
+                            vehicle.set_transform(spawn_pt)
+                            vehicle.set_target_velocity(carla.Vector3D(0,0,0))
+                            vehicle.set_target_angular_velocity(carla.Vector3D(0,0,0))
+                            print("Vehicle Reset via Web.")
+                    except Exception as e:
+                        print(f"Failed to reset vehicle: {e}")
+            
+            while pending_remote_spawns:
+                spawn = pending_remote_spawns.pop(0)
+                try:
+                    obj_type = spawn.get("type", "pedestrian")
+                    dist = float(spawn.get("distance", 20.0))
+                    
+                    if obj_type == "pedestrian": bp = blueprint_library.find('walker.pedestrian.0001'); z_off = 1.0; name = "Pedestrian"
+                    elif obj_type == "vehicle": bp = blueprint_library.find('vehicle.audi.tt'); z_off = 0.5; name = "Vehicle"
+                    elif obj_type == "wall": bp = blueprint_library.find('static.prop.streetbarrier'); z_off = 0.5; name = "Wall"
+                    else: continue
+                    
+                    transform = vehicle.get_transform()
+                    fwd = transform.get_forward_vector()
+                    spawn_loc = transform.location + carla.Location(x=fwd.x*dist, y=fwd.y*dist, z=z_off)
+                    actor = world.try_spawn_actor(bp, carla.Transform(spawn_loc, transform.rotation))
+                    if actor:
+                        actor_list.append(actor)
+                        print(f"WEB API SPAWN: {name} dropped {dist}m ahead!")
+                except Exception:
+                    pass
+            
             if vehicle and hasattr(vehicle, 'is_alive') and vehicle.is_alive:
                 vel = vehicle.get_velocity()
                 speed_kmh = 3.6 * math.sqrt(vel.x**2 + vel.y**2 + vel.z**2)
             
-            # --- PROCESS PENDING DASHBOARD SPAWNS ---
             if len(pending_remote_spawns) > 0:
                 spawns_batch = pending_remote_spawns.copy()
                 pending_remote_spawns.clear()
@@ -644,6 +729,9 @@ def main():
                         current_cam_yaw = veh_transform.rotation.yaw
                         spectator.set_transform(carla.Transform(current_cam_loc, carla.Rotation(pitch=current_cam_pitch, yaw=current_cam_yaw, roll=0.0)))
                         print("Camera snapped directly behind car.")
+                    elif event.key == pygame.K_SPACE:
+                        ctrl.e_stop = not ctrl.e_stop
+                        print(f"E-STOP: {ctrl.e_stop}")
                     elif event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5]:
                         # LIVE SPAWNING SYSTEM
                         transform = vehicle.get_transform()
@@ -736,13 +824,11 @@ def main():
             text_lines = [
                 "NOVA-2.5D COMMAND CENTER",
                 "",
-                f"Mode: {'AUTOPILOT (AI)' if autopilot_enabled else 'MANUAL DRIVING'}",
+                f"Mode: {'AUTOPILOT' if autopilot_enabled else 'MANUAL'} | Source: {ctrl.source}",
                 "",
                 "🎮 Controller Active" if len(joysticks) > 0 else "⌨ Keyboard Active",
-                "Accel: W / Btn A",
-                "Brake: S / Btn B",
-                "Steer: A, D / Stick",
-                "AI   : P / Btn X",
+                f"Thr: {ctrl.throttle*100:.0f}% | Brk: {ctrl.brake*100:.0f}%",
+                f"Str: {ctrl.steer:.2f} | SPD: {speed_kmh:.1f}",
                 "",
                 "--- LIVE SPAWNING ---",
                 "1 / Up : Pothole",
@@ -751,6 +837,8 @@ def main():
                 "4      : Wall",
                 "5      : Building"
             ]
+            if ctrl.e_stop:
+                text_lines.insert(3, "🚨 E-STOP ACTIVE 🚨")
             for i, line in enumerate(text_lines):
                 color = (16, 185, 129) if "AUTOPILOT" in line else (255, 255, 255)
                 if "MANUAL" in line: color = (239, 68, 68)
@@ -898,71 +986,107 @@ def main():
                 except Exception:
                     pass
 
-            # --- DRIVING CONTROLS EXECUTION ---
-            if not autopilot_enabled:
-                keys = pygame.key.get_pressed()
-                throttle = 0.0
-                steer = 0.0
-                brake = 0.0
-                reverse = False
-                
-                # --- KEYBOARD INPUT (Direct, Instant Response) ---
-                if keys[pygame.K_w] or keys[pygame.K_UP]:
-                    throttle = 1.0
-                    reverse = False
-                    brake = 0.0
-                elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
-                    if speed_kmh > 2.0:
-                        brake = 1.0 # Brake if vehicle is rolling forward
-                    else:
-                        throttle = 0.85 # Reverse gear
-                        reverse = True
-                        brake = 0.0
-                
-                # Steer Left (A or Left Arrow) -> Steer and roll left
-                if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-                    steer = -0.75
-                    if throttle == 0.0 and brake == 0.0:
-                        throttle = 0.65 # Provide turning propulsion so vehicle visibly moves left!
-                # Steer Right (D or Right Arrow) -> Steer and roll right
-                elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-                    steer = 0.75
-                    if throttle == 0.0 and brake == 0.0:
-                        throttle = 0.65 # Provide turning propulsion so vehicle visibly moves right!
-                
-                if keys[pygame.K_SPACE]:
-                    brake = 1.0
-                    throttle = 0.0
+            # --- DRIVING CONTROLS EXECUTION (ARBITER) ---
+            
+            # 1. Fetch Remote Web State
+            has_web_input = False
+            if remote_control_state and time.time() - remote_control_state.get("timestamp", 0) < 0.5:
+                # We have a fresh web command
+                wt = remote_control_state.get("throttle", 0.0)
+                ws = remote_control_state.get("steer", 0.0)
+                wb = remote_control_state.get("brake", 0.0)
+                wr = remote_control_state.get("reverse", False)
+                if wt > 0 or abs(ws) > 0 or wb > 0:
+                    has_web_input = True
+                    ctrl.throttle = wt
+                    ctrl.steer = ws
+                    ctrl.brake = wb
+                    ctrl.reverse = wr
+                    ctrl.source = "WEB DASHBOARD"
+                    ctrl.last_web_time = time.time()
 
-                # --- GAMEPAD INPUT (Overrides if gamepad is touched) ---
-                if len(joysticks) > 0:
-                    joy = joysticks[0]
-                    steer_axis = joy.get_axis(0)
-                    if abs(steer_axis) > 0.12:
-                        steer = steer_axis * 0.80
-                    
-                    if joy.get_button(0): # Button A -> Full Throttle
-                        throttle = 1.0
-                        reverse = False
-                    if joy.get_button(1): # Button B -> Brake / Reverse
-                        if speed_kmh > 2.0:
-                            brake = 1.0
-                        else:
-                            throttle = 0.85
-                            reverse = True
-                    for ax_idx in [5, 2]: # Triggers
-                        if joy.get_numaxes() > ax_idx:
-                            val = joy.get_axis(ax_idx)
-                            if val > 0.1:
-                                throttle = max(throttle, float(val))
+            # 2. Fetch Local Pygame State (Overrides Web if touched)
+            keys = pygame.key.get_pressed()
+            has_local_input = False
+            local_t = 0.0
+            local_s = 0.0
+            local_b = 0.0
+            local_r = False
+            
+            # Keyboard
+            if keys[pygame.K_w] or keys[pygame.K_UP]:
+                local_t = 1.0; local_b = 0.0; local_r = False; has_local_input = True
+            elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
+                if speed_kmh > 2.0:
+                    local_b = 1.0
+                else:
+                    local_t = 0.85; local_r = True; local_b = 0.0
+                has_local_input = True
+            if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+                local_s = -0.75; has_local_input = True
+                if local_t == 0.0 and local_b == 0.0: local_t = 0.65
+            elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+                local_s = 0.75; has_local_input = True
+                if local_t == 0.0 and local_b == 0.0: local_t = 0.65
+                
+            # Gamepad
+            if len(joysticks) > 0:
+                joy = joysticks[0]
+                steer_axis = joy.get_axis(0)
+                if abs(steer_axis) > 0.12:
+                    local_s = steer_axis * 0.80; has_local_input = True
+                if joy.get_button(0): # A -> Throttle
+                    local_t = 1.0; local_r = False; has_local_input = True
+                if joy.get_button(1): # B -> Brake/Reverse
+                    if speed_kmh > 2.0: local_b = 1.0
+                    else: local_t = 0.85; local_r = True
+                    has_local_input = True
+                for ax_idx in [5, 2]: # Triggers
+                    if joy.get_numaxes() > ax_idx:
+                        val = joy.get_axis(ax_idx)
+                        if val > 0.1:
+                            local_t = max(local_t, float(val)); has_local_input = True
 
-                # Apply VehicleControl command directly to CARLA PhysX
+            # 3. Arbiter Logic
+            if ctrl.e_stop:
+                ctrl.throttle = 0.0
+                ctrl.steer = 0.0
+                ctrl.brake = 1.0
+                ctrl.reverse = False
+                ctrl.source = "E-STOP"
+            elif has_local_input:
+                ctrl.throttle = local_t
+                ctrl.steer = local_s
+                ctrl.brake = local_b
+                ctrl.reverse = local_r
+                ctrl.source = "GAMEPAD" if len(joysticks) > 0 else "KEYBOARD"
+            elif not has_web_input:
+                # No active inputs from anywhere -> gradual stop
+                ctrl.throttle = 0.0
+                ctrl.brake = 0.0
+                ctrl.steer = ctrl.steer * 0.8 # Return to center
+                # Heartbeat check: If we were in WEB mode but lost connection, safety stop
+                if ctrl.source == "WEB DASHBOARD" and (time.time() - ctrl.last_web_time > 0.5):
+                    ctrl.brake = 1.0
+                    ctrl.source = "WEB TIMEOUT"
+
+            # 4. Authoritative Control Submission
+            if not vehicle.is_alive:
+                running = False
+                print("Vehicle died.")
+                break
+                
+            if autopilot_enabled:
+                # Autopilot takes over completely. Only apply autopilot ONCE to TM when state changes (already handled in events).
+                pass
+            else:
+                # Manual Control
                 vehicle.apply_control(carla.VehicleControl(
-                    throttle=float(throttle),
-                    steer=float(steer),
-                    brake=float(brake),
+                    throttle=float(ctrl.throttle),
+                    steer=float(ctrl.steer),
+                    brake=float(ctrl.brake),
                     hand_brake=False,
-                    reverse=bool(reverse),
+                    reverse=bool(ctrl.reverse),
                     manual_gear_shift=False
                 ))
 
