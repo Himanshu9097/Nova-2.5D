@@ -71,11 +71,15 @@ def main():
         client = carla.Client(HOST, PORT)
         client.set_timeout(60.0) # INCREASED TIMEOUT: Town03 takes a while to load on some PCs
         
-        # Connect to remote Traffic Manager to fix autopilot
-        tm = client.get_trafficmanager(8000)
-        tm.set_global_distance_to_leading_vehicle(2.0)
-        
         world = client.get_world()
+        
+        # Connect to remote Traffic Manager to fix autopilot
+        try:
+            tm = client.get_trafficmanager(8000)
+            tm.set_global_distance_to_leading_vehicle(2.0)
+        except Exception as e:
+            print(f"Traffic Manager setup warning: {e}")
+            tm = None
         
         # [OPTIMIZATION] Disable 3D Rendering on the server to massively save GPU memory
         settings = world.get_settings()
