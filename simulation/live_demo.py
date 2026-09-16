@@ -232,9 +232,10 @@ def main():
                     nova_cells = 0
                     nova_mem = 0
                     for line in result.stdout.split('\n'):
-                        if "Active Cells:" in line: nova_cells = int(line.split(":")[-1].strip())
-                        elif "Map memory bytes:" in line: nova_mem = int(line.split(":")[-1].strip()) / 1024.0
-                except:
+                        if "Active Cells:" in line: nova_cells = int(float(line.split(":")[-1].strip()))
+                        elif "Map memory bytes:" in line: nova_mem = float(line.split(":")[-1].strip()) / 1024.0
+                except Exception as e:
+                    print(f"Error parsing C++ Engine output: {e}")
                     nova_cells, nova_mem = 0, 0
                 
                 # Metrics
